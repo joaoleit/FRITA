@@ -1,6 +1,7 @@
-import { Routes, Route } from 'react-router-dom'
-import { Home, Login, Register, Retrospectives } from './pages'
-import { ROUTES } from './utils'
+import { Routes, Route } from "react-router-dom";
+import { Home, Login, Register, Retrospectives } from "./pages";
+import { ROUTES } from "./utils";
+import RetroBoard from "./components/RetroBoard";
 
 export default function App() {
   return (
@@ -10,6 +11,7 @@ export default function App() {
       <Route path={ROUTES.REGISTER} element={<Register />} />
       <Route path={ROUTES.RETROSPECTIVE} element={<Retrospectives />} />
       <Route path="*" element={<Home />} />
+      <Route path={ROUTES.RETROSPECTIVE} element={<RetroBoard />} />
     </Routes>
-  )
+  );
 }
