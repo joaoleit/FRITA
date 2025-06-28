@@ -1,0 +1,1 @@
+# se is_active da retro for false não deve ser possível editá-la
