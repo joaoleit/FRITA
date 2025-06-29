@@ -1,21 +1,71 @@
-import { Box } from "@mui/material";
-import { Header } from "../../components";
-import ConstructionIcon from '@mui/icons-material/Construction';
-
-type Props = {};
+import { Box, Typography } from "@mui/material";
+import { Header, MainButton } from "../../components";
 
 const Home = () => {
   return (
-    <Box bgcolor="#242424" minHeight="100vh">
+    <Box bgcolor="#1B1B1B" minHeight="100vh">
       <Header />
       <Box
         width="100%"
-        height="100vh"
+        height="95vh"
         display="flex"
         justifyContent="center"
         alignItems="center"
+        bgcolor="#FCF8F7"
       >
-        <ConstructionIcon sx={{height: '200px', width: '200px'}} />
+        <Box display="flex" alignItems="center" justifyContent="center">
+          <Box
+            sx={{
+              width: "462px",
+              height: "390px",
+            }}
+          >
+            <Typography
+              sx={{
+                fontFamily: "'Josefin Slab', serif",
+                fontWeight: 600,
+                fontSize: "40px",
+                lineHeight: "60px",
+                letterSpacing: "0%",
+                verticalAlign: "middle",
+                mb: "24px",
+              }}
+            >
+              Ferramenta de Retrospectiva Interativa para Times Ágeis
+            </Typography>
+            <Typography
+              sx={{
+                fontFamily: "'Poppins', sans-serif",
+                fontWeight: 400,
+                fontSize: "16px",
+                lineHeight: "32px",
+                letterSpacing: "0%",
+                verticalAlign: "middle",
+                mb: "42px",
+              }}
+            >
+              Transforme suas retrospectivas em momentos leves, produtivos e
+              colaborativos. Escolha seu modelo favorito, compartilhe o link com
+              o time e comece agora mesmo.
+            </Typography>
+            <Box>
+              <MainButton
+                color="inherit"
+                onClick={() => {
+                  return;
+                }}
+                sx={{
+                  height: "48px",
+                }}
+              >
+                Criar retrospectiva
+              </MainButton>
+            </Box>
+          </Box>
+          <Box>
+            <img src="/pic 1.png" alt="Pic 1" />
+          </Box>
+        </Box>
       </Box>
     </Box>
   );
