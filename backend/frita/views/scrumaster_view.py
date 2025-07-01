@@ -4,11 +4,13 @@ from django.http import HttpResponseNotAllowed
 from django.http import HttpResponseNotFound
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.http import require_GET
-from controllers import scrumaster_controller
+from django.views.decorators.http import require_GET, require_POST
+from frita.controllers import scrumaster_controller
+
 
 @csrf_exempt
-def create_user(request):
+@require_POST
+def create_scrumaster(request):
     if request.method != "POST":
         return HttpResponseNotAllowed(["POST"])
 
@@ -22,7 +24,6 @@ def create_user(request):
 
         return JsonResponse(
             {
-                "id": master.id,
                 "name": master.name,
                 "email": master.email,
                 "created_at": master.created_at,
@@ -34,16 +35,24 @@ def create_user(request):
         return HttpResponseBadRequest("JSON inválido")
     except Exception as e:
         return HttpResponseBadRequest(str(e))
+    
+@require_GET
+def get_scrumasters(request):
+    try:
+        masters = scrumaster_controller.get_scrumasters()
+
+        return JsonResponse(masters, status=200, safe=False)
+    except Exception as e:
+        return HttpResponseBadRequest(f"Erro interno: {str(e)}")
 
 @require_GET
-def get_user_id(request, id):
+def get_scrumaster_id(request, id):
 
     try:
         master = scrumaster_controller.get_scrumaster_id(id)
 
         return JsonResponse(
             {
-                "id": master.id,
                 "name": master.name,
                 "email": master.email,
                 "created_at": master.created_at,
@@ -51,10 +60,10 @@ def get_user_id(request, id):
         )
 
     except scrumaster_controller.ScrumMaster.DoesNotExist:
-        return HttpResponseNotFound("Usuário não encontrado")
+        return HttpResponseNotFound("Scrum Master não encontrado")
 
 @csrf_exempt
-def update_user(request, id):
+def update_scrumaster(request, id):
     if request.method not in ["PUT", "PATCH"]:
         return HttpResponseNotAllowed(["PUT", "PATCH"])
 
@@ -64,7 +73,6 @@ def update_user(request, id):
             id,
             name=data.get("name"),
             email=data.get("email"),
-            categories=data.get("categories"),
         )
 
         return JsonResponse(
@@ -79,20 +87,20 @@ def update_user(request, id):
     except json.JSONDecodeError:
         return HttpResponseBadRequest("JSON inválido")
     except scrumaster_controller.ScrumMaster.DoesNotExist:
-        return HttpResponseNotFound("Usuário não encontrado")
+        return HttpResponseNotFound("Scrum Master não encontrado")
     except Exception as e:
         return HttpResponseBadRequest(str(e))
 
 @csrf_exempt
-def delete_user(request, id):
+def delete_scrumaster(request, id):
     if request.method != "DELETE":
         return HttpResponseNotAllowed(["DELETE"])
 
     try:
         scrumaster_controller.delete_scrumaster(id)
         return JsonResponse(
-            {"status": "success", "message": "Usuário deletado com sucesso"}
+            {"status": "success", "message": "Scrum Master deletado com sucesso"}
         )
 
     except scrumaster_controller.ScrumMaster.DoesNotExist:
-        return HttpResponseNotFound("Usuário não encontrado")
+        return HttpResponseNotFound("Scrum Master não encontrado")
