@@ -1,20 +1,30 @@
 import {
+  Alert,
   Box,
   Button,
   Container,
   Link,
+  Snackbar,
   TextField,
   Typography,
 } from "@mui/material";
+import CheckIcon from "@mui/icons-material/Check";
 import { useNavigate } from "react-router-dom";
 import { ROUTES } from "../../utils";
 import { Header, MainButton } from "../../components";
+import React from "react";
 
-const Login = () => {
+const Register = () => {
+  const [open, setOpen] = React.useState(false);
   const navigate = useNavigate();
 
-  const handleLogin = () => {
-    navigate(ROUTES.HOME);
+  const handleRegister = () => {
+    // Simulate a successful registration
+    setOpen(true);
+    // Redirect to home page after registration
+    setTimeout(() => {
+      navigate(ROUTES.HOME);
+    }, 3000); // Redirect after 2 seconds
   };
 
   return (
@@ -53,7 +63,7 @@ const Login = () => {
                 mb: "32px",
               }}
             >
-              LOGIN
+              Cadastro
             </Typography>
 
             <Box mb="16px" width="320px">
@@ -80,7 +90,32 @@ const Login = () => {
                 }}
               />
             </Box>
-            <Box mb="10px" width="320px">
+            <Box mb="16px" width="320px">
+              <TextField
+                fullWidth
+                label="E-mail"
+                type="email"
+                variant="outlined"
+                sx={{
+                  "& .MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline": {
+                    borderColor: "#1B1B1B",
+                  },
+                  "& .MuiInputBase-input::placeholder": {
+                    fontFamily: "'Poppins', sans-serif",
+                    fontSize: "16px",
+                    color: "888888",
+                    lineSpacing: "0%",
+                  },
+                  "& .MuiInputLabel-root": {
+                    fontFamily: "'Poppins', sans-serif",
+                    fontSize: "16px",
+                    color: "#888888",
+                    lineSpacing: "0%",
+                  },
+                }}
+              />
+            </Box>
+            <Box mb="32px" width="320px">
               <TextField
                 fullWidth
                 label="Senha"
@@ -105,40 +140,30 @@ const Login = () => {
                 }}
               />
             </Box>
-            <Box width="100%" mb="34px">
-              <Link
-                href="#"
-                underline="none"
-                sx={{
-                  fontFamily: "'Poppins', sans-serif",
-                  fontWeight: 400,
-                  fontSize: "12px",
-                  lineHeight: "16px",
-                  letterSpacing: "0%",
-
-                  color: "#888888",
-                }}
-              >
-                Esqueceu a senha?
-              </Link>
-            </Box>
 
             <MainButton
               variant="contained"
               color="primary"
               sx={{
-                width: "82px",
+                // width: "82px",
                 height: "48px",
               }}
-              onClick={handleLogin}
+              onClick={handleRegister}
             >
-              Entrar
+              Cadastrar
             </MainButton>
           </Box>
         </Box>
       </Box>
+      <Snackbar
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+        open={open}
+        autoHideDuration={6000}
+        onClose={() => setOpen(false)}
+        message="Cadastro realizado com sucesso!"
+      />
     </Box>
   );
 };
 
-export default Login;
+export default Register;
