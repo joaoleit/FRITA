@@ -1,12 +1,8 @@
 import json
-from django.http import HttpResponseBadRequest
-from django.http import HttpResponseNotAllowed
-from django.http import HttpResponseNotFound
-from django.http import JsonResponse
+from django.http import HttpResponseBadRequest, HttpResponseNotAllowed, HttpResponseNotFound, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_GET, require_POST
 from frita.controllers import scrumaster_controller
-
 
 @csrf_exempt
 @require_POST
@@ -53,6 +49,7 @@ def get_scrumaster_id(request, id):
 
         return JsonResponse(
             {
+                "id": master.id,
                 "name": master.name,
                 "email": master.email,
                 "created_at": master.created_at,
@@ -88,6 +85,7 @@ def update_scrumaster(request, id):
         return HttpResponseBadRequest("JSON inválido")
     except scrumaster_controller.ScrumMaster.DoesNotExist:
         return HttpResponseNotFound("Scrum Master não encontrado")
+
     except Exception as e:
         return HttpResponseBadRequest(str(e))
 

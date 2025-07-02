@@ -6,7 +6,7 @@ from django.core.validators import validate_email
 def create_scrumaster(name, email, password):
     if not all([name, email, password]):
         raise ValueError("Todos os campos são obrigatórios.")
-
+    
     if ScrumMaster.objects.filter(email=email).exists():
         raise ValueError("Este email já foi cadastrado.")
     

@@ -1,5 +1,6 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+import uuid
 
 class RetroType(models.TextChoices):
     WNSI = 'well/not_so_well/new_ideas', 'Well/Not so Well/New Ideas'
@@ -36,6 +37,7 @@ class Retrospective(models.Model):
     choices=RetroType.choices
     )
     url = models.CharField(max_length=255) # url que leva pra retro
+    token = models.UUIDField(default=uuid.uuid4, unique=True, null=True, editable=False)
     participants = models.JSONField(default=list) # nomes dos participantes
     resume = models.TextField() # resumo da retro
     created_at = models.DateTimeField(auto_now_add=True)
