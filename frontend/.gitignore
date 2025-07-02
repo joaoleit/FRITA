@@ -36,3 +36,5 @@ coverage/
 Thumbs.db
 ehthumbs.db
 *.orig
+
+*.Zone.Identifier
