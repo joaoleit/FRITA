@@ -31,7 +31,10 @@ class Project(models.Model):
 
 class Retrospective(models.Model):
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
-    retro_type = RetroType.choices
+    retro_type = models.CharField(
+    max_length=50,
+    choices=RetroType.choices
+    )
     url = models.CharField(max_length=255) # url que leva pra retro
     participants = models.JSONField(default=list) # nomes dos participantes
     resume = models.TextField() # resumo da retro
@@ -50,3 +53,19 @@ class Card(models.Model):
 
     def __str__(self):
         return self.type, self.author
+    
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+
+        match self.retro.retro_type:
+            case RetroType.WNSI:
+                if type not in ["well", "not so well", "new ideas"]:
+                    raise ValueError("O tipo do card não corresponde a nenhum campo da retrospectiva!")
+
+            case RetroType.EASY_AS_PIE:
+                if type not in ["shoo fly pie", "pie in the sky", "cutie pie", "easy as pie", "humble pie"]:
+                    raise ValueError("O tipo do card não corresponde a nenhum campo da retrospectiva!")
+                
+            case RetroType.OPEN_THE_BOX:
+                if type not in ["new ideas", "stop", "recycle"]:
+                    raise ValueError("O tipo do card não corresponde a nenhum campo da retrospectiva!")
