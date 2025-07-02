@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import {
   Container,
   Button,
@@ -18,10 +18,11 @@ import {
 } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
 import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
+import { useSocket } from "../../hooks";
 
 // --- Type Definitions ---
 
-interface CardItem {
+export interface CardItem {
   id: string;
   content: string;
   x: number;
@@ -187,6 +188,7 @@ function ColumnComponent({
 
 export default function RetroBoard() {
   const [roomCreated, setRoomCreated] = useState(true); // Default to created for simplicity
+  const socket = useSocket("http://localhost:3001");
   const [cards, setCards] = useState<Record<string, CardItem>>({});
   const [newCardText, setNewCardText] = useState("");
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -236,28 +238,27 @@ export default function RetroBoard() {
   const handleCreateRoom = () => setRoomCreated(true);
 
   const handleAddCard = () => {
-    if (newCardText.trim() !== "") {
-      const newId = `card-${Date.now()}`;
-      const { x, y } = findNextAvailablePosition("well", cards);
-
-      const newCard: CardItem = {
-        id: newId,
-        content: newCardText,
-        x,
-        y,
-        columnId: "well",
-      };
-      setCards((prev) => ({ ...prev, [newId]: newCard }));
-      setNewCardText("");
-    }
+    if (!newCardText.trim()) return;
+    const id = `card-${Date.now()}`;
+    const { x, y } = findNextAvailablePosition("well", cards);
+    const newCard: CardItem = {
+      id,
+      content: newCardText,
+      x,
+      y,
+      columnId: "well",
+    };
+    setCards((prev) => ({ ...prev, [id]: newCard }));
+    socket.emit("add_card", newCard);
+    setNewCardText("");
   };
 
   const handleUpdateCardContent = (cardId: string, newContent: string) => {
-    setCards((prev) => {
-      if (!prev[cardId]) return prev;
-      const updatedCard = { ...prev[cardId], content: newContent };
-      return { ...prev, [cardId]: updatedCard };
-    });
+    setCards((prev) => ({
+      ...prev,
+      [cardId]: { ...prev[cardId], content: newContent },
+    }));
+    socket.emit("update_card", { id: cardId, content: newContent });
   };
 
   const handleDragStart = (event: DragStartEvent) => {
@@ -298,10 +299,9 @@ export default function RetroBoard() {
         };
       }
 
-      return {
-        ...prev,
-        [droppedId]: newCardState,
-      };
+      const updated = { ...prev, [droppedId]: newCardState };
+      socket.emit("move_card", newCardState);
+      return updated;
     });
 
     setActiveId(null);
@@ -320,6 +320,41 @@ export default function RetroBoard() {
     }
     return result;
   }, [cards]);
+
+  useEffect(() => {
+    // ao conectar, receber estado inicial
+    socket.on("initial_cards", (serverCards: Record<string, CardItem>) => {
+      setCards(serverCards);
+    });
+
+    // quando outro cliente adiciona um card
+    socket.on("card_added", (newCard: CardItem) => {
+      setCards((prev) => ({ ...prev, [newCard.id]: newCard }));
+    });
+
+    // quando outro cliente atualiza conteúdo
+    socket.on(
+      "card_updated",
+      ({ id, content }: { id: string; content: string }) => {
+        setCards((prev) => ({
+          ...prev,
+          [id]: { ...prev[id], content },
+        }));
+      }
+    );
+
+    // quando outro cliente move um card
+    socket.on("card_moved", (movedCard: CardItem) => {
+      setCards((prev) => ({ ...prev, [movedCard.id]: movedCard }));
+    });
+
+    return () => {
+      socket.off("initial_cards");
+      socket.off("card_added");
+      socket.off("card_updated");
+      socket.off("card_moved");
+    };
+  }, [socket]);
 
   return (
     <Container maxWidth="xl" sx={{ mt: 4, mb: 4 }}>
