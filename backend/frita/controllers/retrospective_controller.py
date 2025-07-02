@@ -1,4 +1,3 @@
-# se is_active da retro for false não deve ser possível editá-la
 from frita.models import Retrospective, Project
 from django.core.exceptions import ValidationError
 from django.db import transaction
