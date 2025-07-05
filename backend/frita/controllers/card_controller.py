@@ -1,4 +1,4 @@
-from frita.models import card, Card
+from frita.models import Card
 
 def create_card(card_id, author, content, type):
 
@@ -48,7 +48,7 @@ def update_card(id, author=None, content=None, type=None):
 
     if author:
         card.author = author
-    if content is not None:
+    if content:
         card.content = content
     if type:
         card.type = type
