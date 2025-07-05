@@ -1,17 +1,17 @@
-from frita.models import Card
+from frita.models import Retrospective, Card, validate_card_type
 
-def create_card(card_id, author, content, type):
+def create_card(retro_id, author, content, type):
 
-    if not card_id:
-        raise ValueError("Campo obrigatório ausente: card_id")
+    if not retro_id:
+        raise ValueError("Campo obrigatório ausente: retro_id")
     
     try:
-        card = card.objects.get(id=card_id)
-    except card.DoesNotExist:
-        raise ValueError("cardspectiva não encontrada.")
+        retro = Retrospective.objects.get(id=retro_id)
+    except retro.DoesNotExist:
+        raise ValueError("A retrospectiva referenciada não foi encontrada.")
 
     card = Card.objects.create(
-        card=card,
+        retro=retro,
         author=author,
         content=content,
         type=type # conferir no model os tipos válidos
@@ -30,10 +30,10 @@ def get_cards():
     for c in cards:
         lst.append({
             "id": c.id,
-            "card": c.project.id,
-            "author": c.card_type,
-            "content": c.url,
-            "type": c.participants,
+            "retro": c.retro.id,
+            "author": c.author,
+            "content": c.content,
+            "type": c.type,
             "created_at": c.created_at,
         })
     return lst
@@ -42,8 +42,8 @@ def get_card_id(id):
     return Card.objects.get(id=id)
 
 def update_card(id, author=None, content=None, type=None):
-    card = card.objects.get(id=id)
-    if not card.is_active:
+    card = Card.objects.get(id=id)
+    if not card.retro.is_active:
         raise Exception("Cards de retrospectivas inativas não podem ser editados.")
 
     if author:
@@ -51,11 +51,12 @@ def update_card(id, author=None, content=None, type=None):
     if content:
         card.content = content
     if type:
+        validate_card_type(card)
         card.type = type
 
     card.save()
     return card
 
 def delete_card(id):
-    card = card.objects.get(id=id)
+    card = Card.objects.get(id=id)
     card.delete()

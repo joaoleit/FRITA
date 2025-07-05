@@ -16,14 +16,14 @@ def create_card(request):
         data = json.loads(request.body)
 
         card = card_controller.create_card(
-            card_id=data.get("card_id"),
+            retro_id=data.get("retro_id"),
             author=data.get("author"),
             content = data.get("content"),
             type = data.get("type")
         )
 
         return JsonResponse({
-            "card_id": card.project.id,
+            "card_id": card.id,
             "author": card.author,
             "content": card.content,
             "type": card.type,
@@ -49,11 +49,55 @@ def get_card_id(request, id):
         c = card_controller.get_card_id(id)
         return JsonResponse({
             "id": c.id,
-            "retro": c.project.id,
-            "author": c.retro_type,
-            "content": c.url,
-            "type": c.participants,
+            "retro": c.retro.id,
+            "author": c.author,
+            "content": c.content,
+            "type": c.type,
             "created_at": c.created_at,
         })
     except card_controller.card.DoesNotExist:
         return HttpResponseNotFound("Card não encontrado")
+    
+@csrf_exempt
+def update_card(request, id):
+    if request.method not in ["PUT", "PATCH"]:
+        return HttpResponseNotAllowed(["PUT", "PATCH"])
+
+    try:
+        data = json.loads(request.body)
+        c = card_controller.update_card(
+            id=id,
+            author=data.get("author"),
+            content=data.get("content"),
+            type=data.get("type")
+        )
+
+        return JsonResponse({
+            "id": c.id,
+            "author": c.author,
+            "content": c.content,
+            "type": c.type,
+            "created_at": c.created_at
+        })
+
+    except json.JSONDecodeError:
+        return HttpResponseBadRequest("JSON inválido")
+    except card_controller.Card.DoesNotExist:
+        return HttpResponseNotFound("Card não encontrado.")
+    except Exception as e:
+        return HttpResponseBadRequest(str(e))
+    
+@csrf_exempt
+def delete_card(request, id):
+    if request.method != "DELETE":
+        return HttpResponseNotAllowed(["DELETE"])
+
+    try:
+        card_controller.delete_card(id)
+        return JsonResponse({
+            "status": "success",
+            "message": "Card deletado com sucesso"
+        })
+
+    except card_controller.Card.DoesNotExist:
+        return HttpResponseNotFound("Card não encontrado.")

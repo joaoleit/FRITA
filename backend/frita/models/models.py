@@ -2,6 +2,25 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 import uuid
 
+"""
+Valida se o tipo do card (coluna onde ele foi criado) é coerente com o tipo da retrospectiva, 
+por ex.: se um card é criado numa retrospectiva do tipo open the box ele só pode pertencer a uma
+das colunas -> new ideas, stop ou recycle
+"""
+def validate_card_type(card):
+    match card.retro.retro_type:
+        case RetroType.WNSI:
+            if card.type not in ["well", "not so well", "new ideas"]:
+                raise ValueError("O tipo do card não corresponde a nenhum campo da retrospectiva!")
+
+        case RetroType.EASY_AS_PIE:
+            if card.type not in ["shoo fly pie", "pie in the sky", "cutie pie", "easy as pie", "humble pie"]:
+                raise ValueError("O tipo do card não corresponde a nenhum campo da retrospectiva!")
+                
+        case RetroType.OPEN_THE_BOX:
+            if card.type not in ["new ideas", "stop", "recycle"]:
+                raise ValueError("O tipo do card não corresponde a nenhum campo da retrospectiva!")
+
 class RetroType(models.TextChoices):
     WNSI = 'well/not_so_well/new_ideas', 'Well/Not so Well/New Ideas'
     EASY_AS_PIE = 'easy_as_pie', 'Easy As Pie'
@@ -49,7 +68,7 @@ class Retrospective(models.Model):
 class Card(models.Model):
     retro = models.ForeignKey(Retrospective, on_delete=models.CASCADE)
     author = models.CharField(max_length=255, default='Anonymous') 
-    content = models.TextField() # descrição do card
+    content = models.TextField(null=True, blank=True) # descrição do card
     type = models.CharField(max_length=50) # tipo de card pra cada tipo de retro: recycle, new idea, etc
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -57,17 +76,5 @@ class Card(models.Model):
         return self.type, self.author
     
     def save(self, *args, **kwargs):
+        validate_card_type(self)
         super().save(*args, **kwargs)
-
-        match self.retro.retro_type:
-            case RetroType.WNSI:
-                if type not in ["well", "not so well", "new ideas"]:
-                    raise ValueError("O tipo do card não corresponde a nenhum campo da retrospectiva!")
-
-            case RetroType.EASY_AS_PIE:
-                if type not in ["shoo fly pie", "pie in the sky", "cutie pie", "easy as pie", "humble pie"]:
-                    raise ValueError("O tipo do card não corresponde a nenhum campo da retrospectiva!")
-                
-            case RetroType.OPEN_THE_BOX:
-                if type not in ["new ideas", "stop", "recycle"]:
-                    raise ValueError("O tipo do card não corresponde a nenhum campo da retrospectiva!")
