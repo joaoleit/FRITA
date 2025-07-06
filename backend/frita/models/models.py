@@ -31,6 +31,7 @@ class ScrumMaster(AbstractUser):
     name = models.CharField(max_length=255, blank=True, null=True)
     email = models.EmailField(unique=True)
     password = models.CharField(max_length=255)
+    username=str(uuid.uuid4()),  # username obrigatório no AbstractUser
     created_at = models.DateField(auto_now_add=True)
 
     USERNAME_FIELD = 'email'
