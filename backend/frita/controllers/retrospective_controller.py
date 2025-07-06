@@ -52,7 +52,7 @@ def get_retrospective_id(id):
 def update_retrospective(id, retro_type=None, participants=None, resume=None, is_active=None):
     retro = Retrospective.objects.get(id=id)
     if not retro.is_active:
-        raise Exception("Retrospectivas não ativas não podem ser editadas.")
+        raise Exception("Retrospectivas inativas não podem ser editadas.")
 
     if retro_type:
         retro.retro_type = retro_type

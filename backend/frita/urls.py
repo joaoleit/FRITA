@@ -1,4 +1,4 @@
-from frita.views import views, retrospective_view, scrumaster_view, project_view
+from frita.views import views, retrospective_view, scrumaster_view, project_view, card_view
 from django.urls import path
 
 urlpatterns = [
@@ -21,4 +21,9 @@ urlpatterns = [
     path("projects/<int:id>/", project_view.get_project_id, name="get_project"),
     path("projects/update/<int:id>/", project_view.update_project, name="update_project"),
     path("projects/delete/<int:id>/", project_view.delete_project, name="delete_project"),
+    path("cards/create/", card_view.create_card, name="create_card"),
+    path("cards/", card_view.get_cards, name="get_cards"),
+    path("cards/<int:id>/", card_view.get_card_id, name="get_card"),
+    path("cards/update/<int:id>/", card_view.update_card, name="update_card"),
+    path("cards/delete/<int:id>/", card_view.delete_card, name="delete_card"),
 ]
