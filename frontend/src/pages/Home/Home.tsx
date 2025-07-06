@@ -1,7 +1,11 @@
 import { Box, Typography } from "@mui/material";
 import { Header, MainButton } from "../../components";
+import { useNavigate } from "react-router-dom";
+import { ROUTES } from "../../utils";
 
 const Home = () => {
+  const navigate = useNavigate();
+
   return (
     <Box bgcolor="#1B1B1B" minHeight="100vh">
       <Header />
@@ -52,7 +56,7 @@ const Home = () => {
               <MainButton
                 color="inherit"
                 onClick={() => {
-                  return;
+                  navigate(ROUTES.RETROSPECTIVE);
                 }}
                 sx={{
                   height: "48px",
