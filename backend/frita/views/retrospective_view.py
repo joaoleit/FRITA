@@ -116,7 +116,7 @@ def view_public_retro(request, token):
         retro = Retrospective.objects.get(token=token)
 
         return JsonResponse({
-            "project": retro.project,
+            "project": retro.project.id,
             "retro_type": retro.retro_type,
             "participants": retro.participants,
             "resume": retro.resume,
