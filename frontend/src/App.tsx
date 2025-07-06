@@ -1,3 +1,4 @@
+import React from "react";
 import { Routes, Route } from "react-router-dom";
 import { Home, Login, Register, Retrospectives } from "./pages";
 import { ROUTES } from "./utils";
