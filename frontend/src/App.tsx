@@ -1,4 +1,3 @@
-import React from "react";
 import { Routes, Route } from "react-router-dom";
 import { Home, Login, Register, Retrospectives } from "./pages";
 import { ROUTES } from "./utils";
@@ -11,8 +10,8 @@ export default function App() {
       <Route path={ROUTES.LOGIN} element={<Login />} />
       <Route path={ROUTES.REGISTER} element={<Register />} />
       <Route path={ROUTES.RETROSPECTIVE} element={<Retrospectives />} />
-      <Route path="*" element={<Home />} />
-      <Route path={ROUTES.RETROSPECTIVE} element={<RetroBoard />} />
+      <Route path={ROUTES.NOT_FOUND} element={<Home />} />
+      <Route path={ROUTES.RETROBOARD} element={<RetroBoard />} />
     </Routes>
   );
 }

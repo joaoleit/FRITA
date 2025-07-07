@@ -23,14 +23,21 @@ const ColumnComponent: React.FC<ColumnComponentProps> = ({
       sx={{
         flex: 1,
         minHeight: 600,
-        backgroundColor: "#f0f0f0",
         p: 2,
         borderRadius: 2,
         position: "relative",
-        border: "2px dashed #ccc",
       }}
     >
-      <Typography variant="h6" textAlign="center" gutterBottom>
+      <Typography
+        sx={{
+          fontFamily: "'Poppins', sans-serif",
+          fontWeight: 700,
+          fontSize: "20px",
+          lineHeight: "52px",
+          letterSpacing: "0.2px",
+          textAlign: "center",
+        }}
+      >
         {colData.name}
       </Typography>
       {children}

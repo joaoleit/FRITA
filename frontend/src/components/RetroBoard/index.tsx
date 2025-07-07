@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from "react";
-import { Container, Button, TextField, Typography, Box } from "@mui/material";
+import { Button, TextField, Typography, Box, Divider } from "@mui/material";
 import {
   DndContext,
   DragOverlay,
@@ -11,6 +11,8 @@ import DraggableCardItem from "./DraggableCardItem";
 import ColumnComponent from "./ColumnComponent";
 import DragOverlayCard from "./DragOverlayCard";
 import { CardItem, Columns } from "./types";
+import InfoIcon from "@mui/icons-material/InfoOutline";
+
 import React from "react";
 
 export default function RetroBoard() {
@@ -184,7 +186,12 @@ export default function RetroBoard() {
   }, [socket]);
 
   return (
-    <Container maxWidth="xl" sx={{ mt: 4, mb: 4 }}>
+    <Box
+      minHeight="100vh"
+      display={"flex"}
+      flexDirection={"column"}
+      sx={{ bgcolor: "#FCF8F7", padding: "2rem", boxSizing: "border-box" }}
+    >
       {!roomCreated ? (
         <Box textAlign="center">
           <Button variant="contained" onClick={handleCreateRoom}>
@@ -193,10 +200,76 @@ export default function RetroBoard() {
         </Box>
       ) : (
         <>
-          <Typography variant="h4" gutterBottom>
-            Retro Room ✨
-          </Typography>
-          <Box display="flex" gap={2} mb={2}>
+          <Box
+            sx={{
+              bgcolor: "#FFF",
+              padding: "1rem",
+              borderRadius: "16px",
+              width: "fit-content",
+              display: "flex",
+              alignItems: "center",
+              gap: 1,
+            }}
+            boxShadow={1}
+            mb={1}
+          >
+            <Typography
+              component="div"
+              sx={{
+                fontFamily: "'Josefin Slab', serif",
+                fontWeight: 600,
+                fontSize: "24px",
+                lineHeight: "35px",
+                letterSpacing: "0%",
+                verticalAlign: "middle",
+                color: "#1B1B1B",
+              }}
+            >
+              FRITAS{" "}
+            </Typography>
+            <Divider sx={{ bgcolor: "#000" }} orientation="vertical" flexItem />{" "}
+            <Typography
+              sx={{
+                fontFamily: "'Poppins', sans-serif",
+                fontWeight: 500,
+                fontSize: "16px",
+                lineHeight: "52px",
+                letterSpacing: "0.16px",
+              }}
+            >
+              Well, Not So Well, New Ideas
+            </Typography>
+            <InfoIcon sx={{ cursor: "pointer" }} />
+          </Box>
+          <DndContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+            <Box display="flex" alignItems="stretch" flex={1}>
+              {Object.entries(columns).map(([colId, colData], idx, arr) => (
+                <React.Fragment key={colId}>
+                  <ColumnComponent colId={colId} colData={colData}>
+                    {cardsByColumn[colId]?.map((item) => (
+                      <DraggableCardItem
+                        key={item.id}
+                        item={item}
+                        onUpdateContent={handleUpdateCardContent}
+                      />
+                    ))}
+                  </ColumnComponent>
+                  {idx < arr.length - 1 && (
+                    <Divider
+                      orientation="vertical"
+                      flexItem
+                      sx={{ mx: 1, bgcolor: "#000" }}
+                    />
+                  )}
+                </React.Fragment>
+              ))}
+            </Box>
+
+            <DragOverlay>
+              {activeCard ? <DragOverlayCard card={activeCard} /> : null}
+            </DragOverlay>
+          </DndContext>
+          <Box display="flex" gap={2} mt={2}>
             <TextField
               fullWidth
               label="New Card Content"
@@ -209,27 +282,8 @@ export default function RetroBoard() {
               Add Card
             </Button>
           </Box>
-          <DndContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
-            <Box display="flex" gap={3} alignItems="stretch">
-              {Object.entries(columns).map(([colId, colData]) => (
-                <ColumnComponent key={colId} colId={colId} colData={colData}>
-                  {cardsByColumn[colId]?.map((item) => (
-                    <DraggableCardItem
-                      key={item.id}
-                      item={item}
-                      onUpdateContent={handleUpdateCardContent}
-                    />
-                  ))}
-                </ColumnComponent>
-              ))}
-            </Box>
-
-            <DragOverlay>
-              {activeCard ? <DragOverlayCard card={activeCard} /> : null}
-            </DragOverlay>
-          </DndContext>
         </>
       )}
-    </Container>
+    </Box>
   );
 }

@@ -56,7 +56,7 @@ const Home = () => {
               <MainButton
                 color="inherit"
                 onClick={() => {
-                  navigate(ROUTES.RETROSPECTIVE);
+                  navigate(ROUTES.RETROBOARD);
                 }}
                 sx={{
                   height: "48px",

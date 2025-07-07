@@ -89,8 +89,16 @@ const DraggableCardItem: React.FC<DraggableCardItemProps> = ({
             onKeyDown={handleKeyDown}
             onMouseDown={(e) => e.stopPropagation()}
             sx={{
-              height: "100%",
-              "& .MuiInputBase-root": { height: "100%" },
+              // height: "100%",
+              "& .MuiInputBase-root": {
+                // height: "100%",
+                fontFamily: "'Poppins', sans-serif",
+                fontWeight: 400,
+                fontSize: "12px",
+                lineHeight: "16px",
+                margin: 0,
+                padding: "0px",
+              },
               "& .MuiInputBase-input": {
                 height: "100% !important",
                 overflowY: "auto",
@@ -99,7 +107,14 @@ const DraggableCardItem: React.FC<DraggableCardItemProps> = ({
             InputProps={{ disableUnderline: true }}
           />
         ) : (
-          <Typography sx={{ whiteSpace: "pre-wrap", wordBreak: "break-word" }}>
+          <Typography
+            sx={{
+              fontFamily: "'Poppins', sans-serif",
+              fontWeight: 400,
+              fontSize: "12px",
+              lineHeight: "16px",
+            }}
+          >
             {item.content}
           </Typography>
         )}

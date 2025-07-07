@@ -10,7 +10,7 @@ import {
   IconButton,
 } from "@mui/material";
 import { Header, MainButton } from "../../components";
-import { toRem } from "../../utils";
+import { ROUTES, toRem } from "../../utils";
 import { Dayjs } from "dayjs";
 
 import AddIcon from "@mui/icons-material/Add";
@@ -20,6 +20,7 @@ import React from "react";
 import CustomTable from "./Table";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
+import { useNavigate } from "react-router-dom";
 
 const styles = {
   input: {
@@ -43,6 +44,7 @@ const styles = {
 };
 
 const Retrospectives = () => {
+  const navigate = useNavigate();
   const [selectedProject, setSelectedProject] = React.useState("");
   const [selectedRetrospectiveType, setSelectedRetrospectiveType] =
     React.useState("");
@@ -111,9 +113,7 @@ const Retrospectives = () => {
           </Typography>
           <MainButton
             color="inherit"
-            onClick={() => {
-              return;
-            }}
+            onClick={() => navigate(ROUTES.RETROBOARD)}
             sx={{
               // width: "123px",
               // height: "48px",
