@@ -6,9 +6,10 @@ import {
   Box,
   Container,
 } from "@mui/material";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { ROUTES } from "../../utils";
 import { MainButton } from "../MainButton/MainButton";
+import React from "react";
 
 interface HeaderProps {
   whiteVersion?: boolean;
@@ -16,6 +17,96 @@ interface HeaderProps {
 
 const Header = ({ whiteVersion = false }: HeaderProps) => {
   const navigate = useNavigate();
+  const location = useLocation();
+
+  console.log("Current location:", location.pathname);
+
+  const buttons = React.useMemo(() => {
+    if (whiteVersion) {
+      return (
+        <MainButton
+          color="inherit"
+          onClick={() =>
+            navigate(
+              location.pathname === ROUTES.LOGIN
+                ? ROUTES.REGISTER
+                : ROUTES.LOGIN
+            )
+          }
+          sx={{
+            width: "156px",
+            height: "48px",
+          }}
+        >
+          {location.pathname === ROUTES.LOGIN ? "Fazer Cadastro" : "Login"}
+        </MainButton>
+      );
+    }
+
+    if (location.pathname === ROUTES.RETROSPECTIVE) {
+      return (
+        <>
+          <MainButton
+            color="inherit"
+            onClick={() => navigate(ROUTES.RETROSPECTIVE)}
+            sx={{
+              height: "48px",
+            }}
+          >
+            Retrospectivas
+          </MainButton>
+          <MainButton
+            color="inherit"
+            onClick={() => navigate(ROUTES.LOGIN)}
+            sx={{
+              height: "48px",
+            }}
+          >
+            Sair
+          </MainButton>
+        </>
+      );
+    }
+
+    return (
+      <>
+        <MainButton
+          variant="text"
+          onClick={() => {
+            return;
+          }}
+          sx={{
+            height: "48px",
+          }}
+        >
+          Sobre
+        </MainButton>
+        <MainButton
+          color="inherit"
+          onClick={() => {
+            navigate(ROUTES.RETROSPECTIVE);
+          }}
+          sx={{
+            height: "48px",
+          }}
+        >
+          Retrospectivas
+        </MainButton>
+        <MainButton
+          color="inherit"
+          onClick={() => navigate(ROUTES.LOGIN)}
+          sx={{
+            width: "123px",
+            height: "48px",
+            bgcolor: "#FCF8F7",
+            color: "#1B1B1B",
+          }}
+        >
+          Fazer Login
+        </MainButton>
+      </>
+    );
+  }, [whiteVersion]);
 
   return (
     <AppBar
@@ -60,55 +151,7 @@ const Header = ({ whiteVersion = false }: HeaderProps) => {
 
         {/* Botões de navegação */}
         <Box display="flex" gap="32px">
-          {whiteVersion ? (
-            <MainButton
-              color="inherit"
-              onClick={() => navigate(ROUTES.REGISTER)}
-              sx={{
-                width: "156px",
-                height: "48px",
-              }}
-            >
-              Fazer Cadastro
-            </MainButton>
-          ) : (
-            <>
-              <MainButton
-                variant="text"
-                onClick={() => {
-                  return;
-                }}
-                sx={{
-                  height: "48px",
-                }}
-              >
-                Sobre
-              </MainButton>
-              <MainButton
-                color="inherit"
-                onClick={() => {
-                  return;
-                }}
-                sx={{
-                  height: "48px",
-                }}
-              >
-                Retrospectivas
-              </MainButton>
-              <MainButton
-                color="inherit"
-                onClick={() => navigate(ROUTES.LOGIN)}
-                sx={{
-                  width: "123px",
-                  height: "48px",
-                  bgcolor: "#FCF8F7",
-                  color: "#1B1B1B",
-                }}
-              >
-                Fazer Login
-              </MainButton>
-            </>
-          )}
+          {buttons}
         </Box>
       </Toolbar>
     </AppBar>
