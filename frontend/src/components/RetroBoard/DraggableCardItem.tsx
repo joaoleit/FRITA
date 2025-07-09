@@ -55,7 +55,7 @@ const DraggableCardItem: React.FC<DraggableCardItemProps> = ({
       style={style}
       onDoubleClick={() => setIsEditing(true)}
       sx={{
-        backgroundColor: "#fff59d",
+        backgroundColor: item.color || "#F5F5F5",
         boxShadow: 3,
         width: 150,
         height: 150,

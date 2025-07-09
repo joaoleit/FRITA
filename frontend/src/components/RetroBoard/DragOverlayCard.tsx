@@ -1,5 +1,6 @@
 import React from "react";
 import { Card, CardContent, Typography } from "@mui/material";
+import type { CardItem } from "./types";
 
 interface DragOverlayCardProps {
   card: CardItem;
@@ -8,7 +9,7 @@ interface DragOverlayCardProps {
 const DragOverlayCard: React.FC<DragOverlayCardProps> = ({ card }) => (
   <Card
     sx={{
-      backgroundColor: "#fff59d",
+      backgroundColor: card.color || "#F5F5F5",
       boxShadow: 5,
       width: 150,
       height: 150,

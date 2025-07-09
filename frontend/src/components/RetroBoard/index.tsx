@@ -17,7 +17,7 @@ import { useSocket } from "../../hooks";
 import DraggableCardItem from "./DraggableCardItem";
 import ColumnComponent from "./ColumnComponent";
 import DragOverlayCard from "./DragOverlayCard";
-import type { CardItem, Columns } from "./types";
+import type { Board, CardItem, Columns, User } from "./types";
 import InfoIcon from "@mui/icons-material/InfoOutline";
 import { useSearchParams } from "react-router-dom";
 
@@ -29,11 +29,7 @@ import AccessTimeOutlinedIcon from "@mui/icons-material/AccessTimeOutlined";
 import { MainButton } from "../MainButton/MainButton";
 import ShareOutlinedIcon from "@mui/icons-material/ShareOutlined";
 import Popover from "../Popover/Popover";
-
-interface User {
-  name: string;
-  id: string;
-}
+import { v4 as uuidv4 } from "uuid";
 
 const colors = [
   "#CECECE",
@@ -57,8 +53,14 @@ const colors = [
 ];
 
 export default function RetroBoard() {
-  const [roomCreated, setRoomCreated] = useState(true); // Default to created for simplicity
+  const [searchParams] = useSearchParams();
+  const typeParam = searchParams.get("type");
+  const boardIdParam = searchParams.get("boardId") ?? `board-${Date.now()}`;
+
+  const [boards, setBoards] = useState<Record<string, Board>>({});
+  const [roomCreated, setRoomCreated] = useState(true);
   const socket = useSocket("http://localhost:3001");
+  const [boardId] = useState(boardIdParam);
   const [cards, setCards] = useState<Record<string, CardItem>>({});
   const [newCardText, setNewCardText] = useState("");
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -66,11 +68,18 @@ export default function RetroBoard() {
   const [anchorEl, setAnchorEl] = React.useState<HTMLButtonElement | null>(
     null
   );
+  const [user, setUser] = useState<User>(() => {
+    let stored = localStorage.getItem("retro-user");
+    if (stored) return JSON.parse(stored);
+    const newUser = {
+      name: "Usuário " + Math.floor(Math.random() * 1000),
+      id: uuidv4(),
+    };
+    localStorage.setItem("retro-user", JSON.stringify(newUser));
+    return newUser;
+  });
 
   const id = Boolean(anchorEl) ? "simple-popover" : undefined;
-
-  const [searchParams] = useSearchParams();
-  const typeParam = searchParams.get("type");
 
   const retroType = useMemo(() => {
     let retroType: RETROSPECTIVE_TYPES;
@@ -101,17 +110,9 @@ export default function RetroBoard() {
     }
   }, [retroType]);
 
-  const users: User[] = useMemo(
-    () => [
-      {
-        name: "Samuel",
-        id: "user-1",
-      },
-      { name: "João", id: "user-2" },
-      { name: "AA", id: "user-3" },
-    ],
-    []
-  );
+  const boardUsers = useMemo(() => {
+    return Object.values(boards?.[boardId]?.users ?? { [user.id]: user });
+  }, [boards, boardId, user]);
 
   const columns: Columns = {
     well: { name: "Well" },
@@ -169,15 +170,23 @@ export default function RetroBoard() {
     if (!newCardText.trim()) return;
     const id = `card-${Date.now()}`;
     const { x, y } = findNextAvailablePosition("well", cards);
+
+    const boardUsers = Object.values(
+      boards?.[boardId]?.users ?? { [user.id]: user }
+    );
+    const userIdx = boardUsers.findIndex((u) => u.id === user.id);
+
     const newCard: CardItem = {
       id,
       content: newCardText,
       x,
       y,
       columnId: "well",
+      user: user.name,
+      color: colors[userIdx >= 0 ? userIdx % colors.length : 0],
     };
     setCards((prev) => ({ ...prev, [id]: newCard }));
-    socket.emit("add_card", newCard);
+    socket.emit("add_card", { boardId, card: newCard });
     setNewCardText("");
   };
 
@@ -186,7 +195,7 @@ export default function RetroBoard() {
       ...prev,
       [cardId]: { ...prev[cardId], content: newContent },
     }));
-    socket.emit("update_card", { id: cardId, content: newContent });
+    socket.emit("update_card", { boardId, id: cardId, content: newContent });
   };
 
   const handleDragStart = (event: DragStartEvent) => {
@@ -228,7 +237,7 @@ export default function RetroBoard() {
       }
 
       const updated = { ...prev, [droppedId]: newCardState };
-      socket.emit("move_card", newCardState);
+      socket.emit("move_card", { boardId, moved: newCardState });
       return updated;
     });
 
@@ -250,39 +259,92 @@ export default function RetroBoard() {
   }, [cards]);
 
   useEffect(() => {
-    // ao conectar, receber estado inicial
-    socket.on("initial_cards", (serverCards: Record<string, CardItem>) => {
-      setCards(serverCards);
+    socket.on("initial_boards", (boards: Record<string, Board>) => {
+      setBoards(boards);
+      if (boards[boardId]) {
+        setCards(boards[boardId].cards);
+        if (!boards[boardId].users?.[user.id]) {
+          socket.emit("add_user", { boardId, user });
+        }
+      } else {
+        const newBoard: Board = {
+          id: boardId,
+          type: retroType,
+          scrumMaster: "anon",
+          cards: {},
+          users: { [user.id]: user },
+        };
+        socket.emit("create_board", newBoard);
+      }
     });
 
-    // quando outro cliente adiciona um card
-    socket.on("card_added", (newCard: CardItem) => {
-      setCards((prev) => ({ ...prev, [newCard.id]: newCard }));
+    socket.on("board_created", (board: Board) => {
+      setBoards((prev) => ({ ...prev, [board.id]: board }));
+      if (board.id === boardId) setCards(board.cards);
     });
 
-    // quando outro cliente atualiza conteúdo
     socket.on(
-      "card_updated",
-      ({ id, content }: { id: string; content: string }) => {
-        setCards((prev) => ({
-          ...prev,
-          [id]: { ...prev[id], content },
-        }));
+      "card_added",
+      ({ boardId: incomingId, card }: { boardId: string; card: CardItem }) => {
+        if (incomingId === boardId)
+          setCards((prev) => ({ ...prev, [card.id]: card }));
       }
     );
 
-    // quando outro cliente move um card
-    socket.on("card_moved", (movedCard: CardItem) => {
-      setCards((prev) => ({ ...prev, [movedCard.id]: movedCard }));
-    });
+    socket.on(
+      "card_updated",
+      ({
+        boardId: incomingId,
+        id,
+        content,
+      }: {
+        boardId: string;
+        id: string;
+        content: string;
+      }) => {
+        if (incomingId === boardId)
+          setCards((prev) => ({ ...prev, [id]: { ...prev[id], content } }));
+      }
+    );
+
+    socket.on(
+      "card_moved",
+      ({
+        boardId: incomingId,
+        moved,
+      }: {
+        boardId: string;
+        moved: CardItem;
+      }) => {
+        if (incomingId === boardId)
+          setCards((prev) => ({ ...prev, [moved.id]: moved }));
+      }
+    );
+
+    socket.on(
+      "user_added",
+      ({ boardId: incomingId, user }: { boardId: string; user: User }) => {
+        if (incomingId === boardId) {
+          setBoards((prev) => ({
+            ...prev,
+            [boardId]: {
+              ...prev[boardId],
+              users: { ...prev[boardId].users, [user.id]: user },
+            },
+          }));
+        }
+      }
+    );
 
     return () => {
-      socket.off("initial_cards");
+      socket.off("initial_boards");
+      socket.off("board_created");
       socket.off("card_added");
       socket.off("card_updated");
       socket.off("card_moved");
+      socket.off("user_added");
     };
-  }, [socket]);
+  }, [socket, boardId, retroType, user]);
 
   return (
     <Box
@@ -367,7 +429,7 @@ export default function RetroBoard() {
               mb={1}
             >
               <Box display="flex">
-                {users.map((user, idx) => (
+                {boardUsers.map((user, idx) => (
                   <Box
                     key={user.id}
                     sx={{
@@ -379,7 +441,7 @@ export default function RetroBoard() {
                       justifyContent: "center",
                       alignItems: "center",
                       marginLeft: idx === 0 ? 0 : `-${toRem(14)}`,
-                      zIndex: users.length,
+                      zIndex: boardUsers.length,
                       fontFamily: "'Josefin Slab', serif",
                       fontWeight: 700,
                       fontSize: "20px",

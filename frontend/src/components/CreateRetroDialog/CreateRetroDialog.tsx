@@ -3,6 +3,7 @@ import React from "react";
 import { MainButton } from "../MainButton/MainButton";
 import { useNavigate } from "react-router-dom";
 import { RETROSPECTIVE_TYPES, ROUTES } from "../../utils";
+import { v4 as uuidv4 } from "uuid";
 
 interface CreateRetroDialogProps {
   open: boolean;
@@ -11,6 +12,11 @@ interface CreateRetroDialogProps {
 
 const CreateRetroDialog = ({ open, setOpen }: CreateRetroDialogProps) => {
   const navigate = useNavigate();
+
+  const handleNavigate = (type: string) => {
+    const boardId = uuidv4();
+    navigate(`${ROUTES.RETROBOARD}?type=${type}&boardId=${boardId}`);
+  };
 
   return (
     <Dialog
@@ -22,11 +28,7 @@ const CreateRetroDialog = ({ open, setOpen }: CreateRetroDialogProps) => {
       <DialogTitle>Selecione uma retrospectiva</DialogTitle>
       <MainButton
         color="inherit"
-        onClick={() =>
-          navigate(
-            `${ROUTES.RETROBOARD}?type=${RETROSPECTIVE_TYPES.EASY_AS_PIE}`
-          )
-        }
+        onClick={() => handleNavigate(RETROSPECTIVE_TYPES.EASY_AS_PIE)}
         sx={{
           // width: "123px",
           // height: "48px",
@@ -41,11 +43,7 @@ const CreateRetroDialog = ({ open, setOpen }: CreateRetroDialogProps) => {
       </MainButton>
       <MainButton
         color="inherit"
-        onClick={() =>
-          navigate(
-            `${ROUTES.RETROBOARD}?type=${RETROSPECTIVE_TYPES.OPEN_THE_BOX}`
-          )
-        }
+        onClick={() => handleNavigate(RETROSPECTIVE_TYPES.OPEN_THE_BOX)}
         sx={{
           // width: "123px",
           // height: "48px",
@@ -60,11 +58,7 @@ const CreateRetroDialog = ({ open, setOpen }: CreateRetroDialogProps) => {
       </MainButton>
       <MainButton
         color="inherit"
-        onClick={() =>
-          navigate(
-            `${ROUTES.RETROBOARD}?type=${RETROSPECTIVE_TYPES.WELL_NOT_SO_WELL}`
-          )
-        }
+        onClick={() => handleNavigate(RETROSPECTIVE_TYPES.WELL_NOT_SO_WELL)}
         sx={{
           // width: "123px",
           // height: "48px",
