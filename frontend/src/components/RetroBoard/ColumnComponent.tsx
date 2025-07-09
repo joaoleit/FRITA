@@ -1,7 +1,7 @@
 import React from "react";
 import { Box, Typography } from "@mui/material";
 import { useDroppable } from "@dnd-kit/core";
-import { Column } from "./types";
+import type { Column } from "./types";
 
 interface ColumnComponentProps {
   colId: string;

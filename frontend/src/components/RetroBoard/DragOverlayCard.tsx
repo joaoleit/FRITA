@@ -1,6 +1,5 @@
 import React from "react";
 import { Card, CardContent, Typography } from "@mui/material";
-import { CardItem } from "./types";
 
 interface DragOverlayCardProps {
   card: CardItem;

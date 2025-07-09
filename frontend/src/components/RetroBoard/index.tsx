@@ -1,5 +1,12 @@
 import { useState, useMemo, useEffect } from "react";
-import { Button, TextField, Typography, Box, Divider } from "@mui/material";
+import {
+  Button,
+  TextField,
+  Typography,
+  Box,
+  Divider,
+  IconButton,
+} from "@mui/material";
 import {
   DndContext,
   DragOverlay,
@@ -10,10 +17,44 @@ import { useSocket } from "../../hooks";
 import DraggableCardItem from "./DraggableCardItem";
 import ColumnComponent from "./ColumnComponent";
 import DragOverlayCard from "./DragOverlayCard";
-import { CardItem, Columns } from "./types";
+import type { CardItem, Columns } from "./types";
 import InfoIcon from "@mui/icons-material/InfoOutline";
+import { useSearchParams } from "react-router-dom";
 
 import React from "react";
+import { RETROSPECTIVE_TYPES, toRem } from "../../utils";
+import InfoDialog from "./InfoDialog";
+import GridViewIcon from "@mui/icons-material/GridView";
+import AccessTimeOutlinedIcon from "@mui/icons-material/AccessTimeOutlined";
+import { MainButton } from "../MainButton/MainButton";
+import ShareOutlinedIcon from "@mui/icons-material/ShareOutlined";
+import Popover from "../Popover/Popover";
+
+interface User {
+  name: string;
+  id: string;
+}
+
+const colors = [
+  "#CECECE",
+  "#FAA389",
+  "#5ED0D5",
+  "#FBC935",
+  "#C4DCFB",
+  "#CFC4E8",
+  "#B7E6DB",
+  "#FFD9DB",
+  "#FFCDD2",
+  "#F8BBD0",
+  "#E1BEE7",
+  "#D1C4E9",
+  "#C5CAE9",
+  "#BBDEFB",
+  "#B3E5FC",
+  "#B2EBF2",
+  "#B2DFDB",
+  "#C8E6C9",
+];
 
 export default function RetroBoard() {
   const [roomCreated, setRoomCreated] = useState(true); // Default to created for simplicity
@@ -21,6 +62,56 @@ export default function RetroBoard() {
   const [cards, setCards] = useState<Record<string, CardItem>>({});
   const [newCardText, setNewCardText] = useState("");
   const [activeId, setActiveId] = useState<string | null>(null);
+  const [openInfoDialog, setOpenInfoDialog] = useState(false);
+  const [anchorEl, setAnchorEl] = React.useState<HTMLButtonElement | null>(
+    null
+  );
+
+  const id = Boolean(anchorEl) ? "simple-popover" : undefined;
+
+  const [searchParams] = useSearchParams();
+  const typeParam = searchParams.get("type");
+
+  const retroType = useMemo(() => {
+    let retroType: RETROSPECTIVE_TYPES;
+
+    if (
+      typeParam === RETROSPECTIVE_TYPES.EASY_AS_PIE ||
+      typeParam === RETROSPECTIVE_TYPES.OPEN_THE_BOX ||
+      typeParam === RETROSPECTIVE_TYPES.WELL_NOT_SO_WELL
+    ) {
+      retroType = typeParam as RETROSPECTIVE_TYPES;
+    } else {
+      retroType = RETROSPECTIVE_TYPES.WELL_NOT_SO_WELL;
+    }
+
+    return retroType;
+  }, [typeParam]);
+
+  const boardTitle = useMemo(() => {
+    switch (retroType) {
+      case RETROSPECTIVE_TYPES.EASY_AS_PIE:
+        return "Easy As Pie";
+      case RETROSPECTIVE_TYPES.OPEN_THE_BOX:
+        return "Open The Box";
+      case RETROSPECTIVE_TYPES.WELL_NOT_SO_WELL:
+        return "Well, Not so well, New ideas";
+      default:
+        return "Well, Not so well, New ideas";
+    }
+  }, [retroType]);
+
+  const users: User[] = useMemo(
+    () => [
+      {
+        name: "Samuel",
+        id: "user-1",
+      },
+      { name: "João", id: "user-2" },
+      { name: "AA", id: "user-3" },
+    ],
+    []
+  );
 
   const columns: Columns = {
     well: { name: "Well" },
@@ -62,6 +153,14 @@ export default function RetroBoard() {
       }
     }
     return { x: 20, y: newY };
+  };
+
+  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
   };
 
   const handleCreateRoom = () => setRoomCreated(true);
@@ -201,45 +300,137 @@ export default function RetroBoard() {
       ) : (
         <>
           <Box
-            sx={{
-              bgcolor: "#FFF",
-              padding: "1rem",
-              borderRadius: "16px",
-              width: "fit-content",
-              display: "flex",
-              alignItems: "center",
-              gap: 1,
-            }}
-            boxShadow={1}
-            mb={1}
+            display="flex"
+            justifyContent="space-between"
+            alignItems="center"
           >
-            <Typography
-              component="div"
+            <Box
               sx={{
-                fontFamily: "'Josefin Slab', serif",
-                fontWeight: 600,
-                fontSize: "24px",
-                lineHeight: "35px",
-                letterSpacing: "0%",
-                verticalAlign: "middle",
-                color: "#1B1B1B",
+                bgcolor: "#FFF",
+                padding: "1rem",
+                borderRadius: "16px",
+                width: "fit-content",
+                display: "flex",
+                alignItems: "center",
+                gap: 1,
+                height: toRem(68),
               }}
+              boxShadow={1}
+              mb={1}
             >
-              FRITAS{" "}
-            </Typography>
-            <Divider sx={{ bgcolor: "#000" }} orientation="vertical" flexItem />{" "}
-            <Typography
+              <Typography
+                component="div"
+                sx={{
+                  fontFamily: "'Josefin Slab', serif",
+                  fontWeight: 600,
+                  fontSize: "24px",
+                  lineHeight: "35px",
+                  letterSpacing: "0%",
+                  verticalAlign: "middle",
+                  color: "#1B1B1B",
+                }}
+              >
+                FRITAS{" "}
+              </Typography>
+              <Divider
+                sx={{ bgcolor: "#000" }}
+                orientation="vertical"
+                flexItem
+              />{" "}
+              <Typography
+                sx={{
+                  fontFamily: "'Poppins', sans-serif",
+                  fontWeight: 500,
+                  fontSize: "16px",
+                  lineHeight: "52px",
+                  letterSpacing: "0.16px",
+                }}
+              >
+                {boardTitle}
+              </Typography>
+              <IconButton onClick={() => setOpenInfoDialog(true)}>
+                <InfoIcon sx={{ cursor: "pointer" }} />
+              </IconButton>
+            </Box>
+            <Box
               sx={{
-                fontFamily: "'Poppins', sans-serif",
-                fontWeight: 500,
-                fontSize: "16px",
-                lineHeight: "52px",
-                letterSpacing: "0.16px",
+                bgcolor: "#FFF",
+                padding: "1rem",
+                borderRadius: "16px",
+                width: "fit-content",
+                display: "flex",
+                alignItems: "center",
+                gap: 1,
+                height: toRem(68),
               }}
+              boxShadow={1}
+              mb={1}
             >
-              Well, Not So Well, New Ideas
-            </Typography>
-            <InfoIcon sx={{ cursor: "pointer" }} />
+              <Box display="flex">
+                {users.map((user, idx) => (
+                  <Box
+                    key={user.id}
+                    sx={{
+                      height: toRem(42),
+                      width: toRem(42),
+                      borderRadius: "50%",
+                      bgcolor: colors[idx % colors.length],
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                      marginLeft: idx === 0 ? 0 : `-${toRem(14)}`,
+                      zIndex: users.length,
+                      fontFamily: "'Josefin Slab', serif",
+                      fontWeight: 700,
+                      fontSize: "20px",
+                      lineHeight: "24px",
+                    }}
+                  >
+                    {user.name[0].toUpperCase()}
+                  </Box>
+                ))}
+              </Box>
+              <Divider
+                sx={{ bgcolor: "#000" }}
+                orientation="vertical"
+                flexItem
+              />
+              <IconButton>
+                <GridViewIcon
+                  sx={{ cursor: "pointer", color: "#1B1B1B" }}
+                  fontSize="large"
+                />
+              </IconButton>
+              <IconButton>
+                <AccessTimeOutlinedIcon
+                  sx={{ cursor: "pointer", color: "#1B1B1B" }}
+                  fontSize="large"
+                />
+              </IconButton>
+              <MainButton
+                onClick={(e) => {
+                  handleClick(e);
+                }}
+                sx={{
+                  bgcolor: "#FCF8F7",
+                  color: "#1B1B1B",
+                  border: "1px solid #1B1B1B",
+                  borderRadius: "3px",
+                  gap: "8px",
+                }}
+              >
+                <ShareOutlinedIcon />
+                Compartilhar
+              </MainButton>
+              <MainButton
+                onClick={() => {
+                  return;
+                }}
+                sx={{ marginLeft: "16px" }}
+              >
+                Salvar
+              </MainButton>
+            </Box>
           </Box>
           <DndContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
             <Box display="flex" alignItems="stretch" flex={1}>
@@ -282,6 +473,73 @@ export default function RetroBoard() {
               Add Card
             </Button>
           </Box>
+          <InfoDialog
+            boardTitle={boardTitle}
+            open={openInfoDialog}
+            setOpen={setOpenInfoDialog}
+            retroType={retroType}
+          />
+          <Popover
+            anchorEl={anchorEl}
+            setAnchorEl={setAnchorEl}
+            id={id}
+            title="Compartilhar retrospectiva"
+            hasCloseButton
+            children={
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  mt: toRem(26),
+                }}
+              >
+                <TextField
+                  value={window.location.href}
+                  InputProps={{
+                    readOnly: true,
+                  }}
+                  fullWidth
+                  variant="outlined"
+                  sx={{
+                    "& .MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline":
+                      {
+                        borderColor: "#1B1B1B",
+                        borderTopRightRadius: "0px",
+                        borderBottomRightRadius: "0px",
+                        height: "56px",
+                      },
+                    "& .MuiInputBase-input::placeholder": {
+                      fontFamily: "'Poppins', sans-serif",
+                      fontSize: "16px",
+                      color: "888888",
+                      lineSpacing: "0%",
+                    },
+                    "& .MuiInputLabel-root": {
+                      fontFamily: "'Poppins', sans-serif",
+                      fontSize: "16px",
+                      color: "#888888",
+                      lineSpacing: "0%",
+                    },
+                  }}
+                />
+                <MainButton
+                  variant="contained"
+                  onClick={() =>
+                    navigator.clipboard.writeText(window.location.href)
+                  }
+                  sx={{
+                    height: "53px",
+                    borderTopLeftRadius: "0px",
+                    borderBottomLeftRadius: "0px",
+                    mb: toRem(3),
+                  }}
+                >
+                  Copiar
+                </MainButton>
+              </Box>
+            }
+          />
         </>
       )}
     </Box>

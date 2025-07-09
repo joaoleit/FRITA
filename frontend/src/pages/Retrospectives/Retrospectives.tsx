@@ -9,7 +9,7 @@ import {
   MenuItem,
   IconButton,
 } from "@mui/material";
-import { Header, MainButton } from "../../components";
+import { CreateRetroDialog, Header, MainButton } from "../../components";
 import { ROUTES, toRem } from "../../utils";
 import { Dayjs } from "dayjs";
 
@@ -49,6 +49,7 @@ const Retrospectives = () => {
   const [selectedRetrospectiveType, setSelectedRetrospectiveType] =
     React.useState("");
   const [date, setDate] = React.useState<Date | null>(null);
+  const [openRetroDialog, setOpenRetroDialog] = React.useState(false);
 
   const projects = [
     {
@@ -113,7 +114,7 @@ const Retrospectives = () => {
           </Typography>
           <MainButton
             color="inherit"
-            onClick={() => navigate(ROUTES.RETROBOARD)}
+            onClick={() => setOpenRetroDialog(true)}
             sx={{
               // width: "123px",
               // height: "48px",
@@ -244,6 +245,7 @@ const Retrospectives = () => {
           <CustomTable />
         </Box>
       </Box>
+      <CreateRetroDialog open={openRetroDialog} setOpen={setOpenRetroDialog} />
     </Box>
   );
 };

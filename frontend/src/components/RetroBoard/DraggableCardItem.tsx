@@ -3,7 +3,7 @@ import { Card, CardContent, Typography, Box, TextField } from "@mui/material";
 import { useDraggable } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
 import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
-import { CardItem } from "./types";
+import type { CardItem } from "./types";
 interface DraggableCardItemProps {
   item: CardItem;
   onUpdateContent: (id: string, newContent: string) => void;
