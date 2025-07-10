@@ -15,6 +15,7 @@ export interface CardItem {
 interface User {
   name: string;
   id: string;
+  isScrumMaster: boolean;
 }
 
 interface Board {
@@ -23,6 +24,8 @@ interface Board {
   scrumMaster: string;
   cards: Record<string, CardItem>;
   users: Record<string, User>;
+  // retroTime: number;
+  // retroTimeRunning: boolean;
 }
 
 type BoardsMap = Record<string, Board>;
