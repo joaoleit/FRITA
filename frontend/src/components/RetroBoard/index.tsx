@@ -237,6 +237,15 @@ export default function RetroBoard() {
     socket.emit("update_card", { boardId, id: cardId, content: newContent });
   };
 
+  const handleDeleteCard = (cardId: string) => {
+    setCards((prev) => {
+      const updated = { ...prev };
+      delete updated[cardId];
+      return updated;
+    });
+    socket.emit("remove_card", { boardId, cardId });
+  };
+
   const handleDragStart = (event: DragStartEvent) => {
     setActiveId(String(event.active.id));
   };
@@ -378,6 +387,16 @@ export default function RetroBoard() {
       }
     );
 
+    socket.on("card_removed", ({ boardId: incomingId, cardId }) => {
+      if (incomingId === boardId) {
+        setCards((prev) => {
+          const updated = { ...prev };
+          delete updated[cardId];
+          return updated;
+        });
+      }
+    });
+
     return () => {
       socket.off("initial_boards");
       socket.off("board_created");
@@ -385,6 +404,7 @@ export default function RetroBoard() {
       socket.off("card_updated");
       socket.off("card_moved");
       socket.off("user_added");
+      socket.off("card_removed");
     };
   }, [socket, boardId, retroType, user]);
 
@@ -526,6 +546,7 @@ export default function RetroBoard() {
                     key={item.id}
                     item={item}
                     onUpdateContent={handleUpdateCardContent}
+                    onDeleteCard={handleDeleteCard}
                   />
                 ))}
               </ColumnComponent>
@@ -566,6 +587,7 @@ export default function RetroBoard() {
           display: "flex",
           alignItems: "center",
           gap: 1,
+          zIndex: 1000,
         }}
         boxShadow={1}
         mb={1}
@@ -580,7 +602,11 @@ export default function RetroBoard() {
         setOpen={setOpenInfoDialog}
         retroType={retroType}
       />
-      <Dialog open={openAddCardDialog} maxWidth="md" onClose={() => setOpenAddCardDialog(false)}>
+      <Dialog
+        open={openAddCardDialog}
+        maxWidth="md"
+        onClose={() => setOpenAddCardDialog(false)}
+      >
         <Box sx={{ padding: toRem(32), width: toRem(612) }}>
           <Box display="flex" alignItems="center">
             <TextField
@@ -589,14 +615,20 @@ export default function RetroBoard() {
               variant="outlined"
               value={newCardText}
               onChange={(e) => setNewCardText(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && handleAddCard()}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  handleAddCard();
+                  setOpenAddCardDialog(false);
+                }
+              }}
               sx={styles.textField}
             />
             <MainButton
               variant="contained"
               onClick={() => {
                 handleAddCard();
-                setOpenAddCardDialog(false);}}
+                setOpenAddCardDialog(false);
+              }}
               sx={{
                 height: "53px",
                 borderTopLeftRadius: "0px",
@@ -621,6 +653,14 @@ export default function RetroBoard() {
               value={userName}
               onChange={(e) => {
                 setUserName(e.target.value);
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  setUser({
+                    name: userName,
+                    id: uuidv4(),
+                  });
+                }
               }}
               sx={styles.textField}
             />

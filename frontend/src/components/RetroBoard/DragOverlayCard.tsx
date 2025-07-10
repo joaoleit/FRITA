@@ -12,7 +12,7 @@ const DragOverlayCard: React.FC<DragOverlayCardProps> = ({ card }) => (
       backgroundColor: card.color || "#F5F5F5",
       boxShadow: 5,
       width: 150,
-      height: 150,
+      height: 'auto',
       padding: 0,
       margin: 0,
       borderRadius: 2,

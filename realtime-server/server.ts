@@ -67,6 +67,16 @@ io.on("connection", (socket: Socket) => {
   });
 
   socket.on(
+    "remove_card",
+    ({ boardId, cardId }: { boardId: string; cardId: string }) => {
+      if (boards[boardId] && boards[boardId].cards[cardId]) {
+        delete boards[boardId].cards[cardId];
+        io.emit("card_removed", { boardId, cardId });
+      }
+    }
+  );
+
+  socket.on(
     "add_user",
     ({ boardId, user }: { boardId: string; user: User }) => {
       if (boards[boardId]) {

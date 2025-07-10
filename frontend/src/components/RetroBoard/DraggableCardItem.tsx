@@ -1,17 +1,29 @@
 import React, { useState } from "react";
-import { Card, CardContent, Typography, Box, TextField } from "@mui/material";
+import {
+  Card,
+  CardContent,
+  Typography,
+  Box,
+  TextField,
+  Icon,
+  IconButton,
+} from "@mui/material";
 import { useDraggable } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
 import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
 import type { CardItem } from "./types";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+
 interface DraggableCardItemProps {
   item: CardItem;
   onUpdateContent: (id: string, newContent: string) => void;
+  onDeleteCard: (cardId: string) => void
 }
 
 const DraggableCardItem: React.FC<DraggableCardItemProps> = ({
   item,
   onUpdateContent,
+  onDeleteCard
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editedContent, setEditedContent] = useState(item.content);
@@ -58,7 +70,7 @@ const DraggableCardItem: React.FC<DraggableCardItemProps> = ({
         backgroundColor: item.color || "#F5F5F5",
         boxShadow: 3,
         width: 150,
-        height: 150,
+        height: "auto",
         padding: "2px",
         borderRadius: 2,
         fontFamily: "Comic Sans MS",
@@ -66,6 +78,7 @@ const DraggableCardItem: React.FC<DraggableCardItemProps> = ({
         display: "flex",
         flexDirection: "column",
         cursor: isEditing ? "text" : "pointer",
+        zIndex: isEditing ? 1000 : "auto",
       }}
     >
       <Box
@@ -75,12 +88,31 @@ const DraggableCardItem: React.FC<DraggableCardItemProps> = ({
         sx={{ cursor: isEditing ? "default" : "move", touchAction: "none" }}
       >
         <DragIndicatorIcon sx={{ fontSize: 20, color: "#9E9E9E" }} />
+        {isEditing && (
+          <IconButton
+            sx={{ padding: 0, position: "absolute", marginLeft: 5 }}
+            onMouseDown={(e) => {
+              e.stopPropagation();
+              e.preventDefault();
+              console.log("Delete button clicked");
+              onDeleteCard(item.id);
+            }}
+          >
+            <DeleteOutlineIcon sx={{ fontSize: 20, color: "#9E9E9E" }} />
+          </IconButton>
+        )}
       </Box>
       <CardContent sx={{ flexGrow: 1, padding: "0 8px 8px 8px" }}>
         {isEditing ? (
           <TextField
             fullWidth
             multiline
+            rows={Math.max(
+              1,
+              Math.ceil(
+                (isEditing ? editedContent.length : item.content.length) / 17
+              )
+            )}
             variant="standard"
             autoFocus
             value={editedContent}
@@ -113,6 +145,8 @@ const DraggableCardItem: React.FC<DraggableCardItemProps> = ({
               fontWeight: 400,
               fontSize: "12px",
               lineHeight: "16px",
+              lineBreak: "normal",
+              wordBreak: "break-word",
             }}
           >
             {item.content}
