@@ -9,6 +9,10 @@ def create_card(retro_id, author, content, type):
         retro = Retrospective.objects.get(id=retro_id)
     except retro.DoesNotExist:
         raise ValueError("A retrospectiva referenciada não foi encontrada.")
+    
+    if not retro.is_active:
+        raise Exception("Retrospectivas inativas não podem ter novos cards.")
+        
 
     card = Card.objects.create(
         retro=retro,

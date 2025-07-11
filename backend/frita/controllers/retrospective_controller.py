@@ -19,7 +19,7 @@ def create_retrospective(project_id, retro_type):
             is_active=True
         )
         # pra acessar a retro sem autenticação
-        retro.url = f"https://localhost:8000/retrospectives/public/{retro.token}/"
+        retro.url = f"http://localhost:8000/retrospectives/public/{retro.token}/"
         retro.save()
 
     return retro
