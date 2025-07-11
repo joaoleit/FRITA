@@ -1,6 +1,9 @@
 from frita.models import Retrospective, Project
 from django.core.exceptions import ValidationError
 from django.db import transaction
+from dotenv import load_dotenv
+from google import genai
+import os
 
 def create_retrospective(project_id, retro_type):
 
@@ -97,5 +100,46 @@ def remove_participant_from_retro(retro_id, participant_name):
         raise ValueError("Participante não encontrado na retrospectiva.")
 
     retro.participants.remove(participant_name)
+    retro.save()
+    return retro
+
+def generate_retro_resume(retro_id):
+    """
+    Gera e salva o resumo da retrospectiva usando o Gemini.
+    """
+    load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), '..', '.envs', '.gemini_api_key'))
+
+    try:
+        retro = Retrospective.objects.get(id=retro_id)
+    except Retrospective.DoesNotExist:
+        raise ValueError("Retrospectiva não encontrada.")
+
+    # Pega os cards relacionados
+    cards = retro.card_set.all()
+    if not cards:
+        retro.resume = "Sem cards para gerar o resumo."
+        retro.save()
+        return retro
+
+    # Monta o prompt baseado no conteúdo e tipo dos cards
+    prompt = "Gere um resumo desta retrospectiva considerando os seguintes cards:\n\n"
+    for card in cards:
+        prompt += f"- [{card.type}] {card.content}\n"
+
+    # Chama o Gemini usando o Client (forma que funcionou pra você)
+    api_key = os.getenv("GEMINI_API_KEY")
+    client = genai.Client(api_key=api_key)
+
+    try:
+        response = client.models.generate_content(
+            model="gemini-2.5-flash",
+            contents=prompt,
+        )
+        resumo_gerado = response.text.strip() if response.text else "Resumo não gerado."
+    except Exception as e:
+        resumo_gerado = f"Erro ao gerar resumo: {str(e)}"
+
+    # Salva no campo resume
+    retro.resume = resumo_gerado
     retro.save()
     return retro
