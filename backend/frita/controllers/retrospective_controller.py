@@ -113,20 +113,31 @@ def generate_retro_resume(retro_id):
         retro = Retrospective.objects.get(id=retro_id)
     except Retrospective.DoesNotExist:
         raise ValueError("Retrospectiva não encontrada.")
+    
+    if not retro.is_active:
+        raise ValueError("A retrospectiva precisa ter sido finalizada para gerar um resumo.")
 
-    # Pega os cards relacionados
+    # cards da retro
     cards = retro.card_set.all()
     if not cards:
         retro.resume = "Sem cards para gerar o resumo."
         retro.save()
         return retro
 
-    # Monta o prompt baseado no conteúdo e tipo dos cards
-    prompt = "Gere um resumo desta retrospectiva considerando os seguintes cards:\n\n"
+    # prompt pro conteúdo e tipo dos cards
+    prompt = """
+    Gere um resumo desta retrospectiva com base nos seguintes cards.
+
+    NÃO use Markdown, NÃO use asteriscos, listas, títulos ou negrito.
+    Apenas texto corrido, separado em parágrafos claros.
+
+    Cards:
+    """
+    
     for card in cards:
         prompt += f"- [{card.type}] {card.content}\n"
 
-    # Chama o Gemini usando o Client (forma que funcionou pra você)
+    # chama o gemini
     api_key = os.getenv("GEMINI_API_KEY")
     client = genai.Client(api_key=api_key)
 
@@ -139,7 +150,7 @@ def generate_retro_resume(retro_id):
     except Exception as e:
         resumo_gerado = f"Erro ao gerar resumo: {str(e)}"
 
-    # Salva no campo resume
+    # salva o resumo
     retro.resume = resumo_gerado
     retro.save()
     return retro
