@@ -17,13 +17,13 @@ import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 interface DraggableCardItemProps {
   item: CardItem;
   onUpdateContent: (id: string, newContent: string) => void;
-  onDeleteCard: (cardId: string) => void
+  onDeleteCard: (cardId: string) => void;
 }
 
 const DraggableCardItem: React.FC<DraggableCardItemProps> = ({
   item,
   onUpdateContent,
-  onDeleteCard
+  onDeleteCard,
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editedContent, setEditedContent] = useState(item.content);
@@ -70,7 +70,7 @@ const DraggableCardItem: React.FC<DraggableCardItemProps> = ({
         backgroundColor: item.color || "#F5F5F5",
         boxShadow: 3,
         width: 150,
-        height: "auto",
+        minHeight: 150,
         padding: "2px",
         borderRadius: 2,
         fontFamily: "Comic Sans MS",
