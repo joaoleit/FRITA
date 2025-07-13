@@ -127,12 +127,23 @@ def generate_retro_resume(retro_id):
     # prompt pro conteúdo e tipo dos cards
     prompt = """
     Gere um resumo desta retrospectiva com base nos seguintes cards.
+    É preciso incluir: total de cards separando por type, onde cada type
+    representa uma coluna de um tipo de retrospectiva divertida (por exemplo
+    a retrospectiva easy as pie) mas sem traduzir o nome do type, também os
+    principais temas discutidos e os nomes dos participantes que contribuíram.
 
     NÃO use Markdown, NÃO use asteriscos, listas, títulos ou negrito.
     Apenas texto corrido, separado em parágrafos claros.
-
-    Cards:
     """
+    
+    participants = retro.participants or []
+    
+    if participants:
+        prompt += f"\nParticiparam desta retrospectiva: {', '.join(participants)}.\n"
+    else:
+        prompt += "\nNenhum participante foi registrado.\n"
+
+    prompt += "\nCards:\n"
     
     for card in cards:
         prompt += f"- [{card.type}] {card.content}\n"
