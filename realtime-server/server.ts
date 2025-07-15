@@ -24,8 +24,8 @@ interface Board {
   scrumMaster: string;
   cards: Record<string, CardItem>;
   users: Record<string, User>;
-  // retroTime: number;
-  // retroTimeRunning: boolean;
+  retroTime: number;
+  retroTimeRunning: boolean;
 }
 
 type BoardsMap = Record<string, Board>;
@@ -95,6 +95,32 @@ io.on("connection", (socket: Socket) => {
       if (boards[boardId] && boards[boardId].users[userId]) {
         delete boards[boardId].users[userId];
         io.emit("user_removed", { boardId, userId });
+      }
+    }
+  );
+
+  socket.on(
+    "update_retro_time",
+    ({ boardId, retroTime }: { boardId: string; retroTime: number }) => {
+      if (boards[boardId]) {
+        boards[boardId].retroTime = retroTime;
+        io.emit("retro_time_updated", { boardId, retroTime });
+      }
+    }
+  );
+
+  socket.on(
+    "toggle_retro_time_running",
+    ({
+      boardId,
+      retroTimeRunning,
+    }: {
+      boardId: string;
+      retroTimeRunning: boolean;
+    }) => {
+      if (boards[boardId]) {
+        boards[boardId].retroTimeRunning = retroTimeRunning;
+        io.emit("retro_time_running_toggled", { boardId, retroTimeRunning });
       }
     }
   );

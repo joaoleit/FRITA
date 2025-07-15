@@ -28,6 +28,6 @@ export interface Board {
   scrumMaster: string;
   cards: Record<string, CardItem>;
   users: Record<string, User>;
-  // retroTime: number;
-  // retroTimeRunning: boolean;
+  retroTime: number;
+  retroTimeRunning: boolean;
 }
