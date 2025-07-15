@@ -39,6 +39,8 @@ const CountdownTimer: React.FC<CountdownTimerProps> = ({
 
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
+  console.log("CountdownTimer mounted with initial time:", retroTime, running);
+
   useEffect(() => {
     if (running && timeLeft > 0) {
       intervalRef.current = setInterval(() => {
@@ -68,6 +70,7 @@ const CountdownTimer: React.FC<CountdownTimerProps> = ({
   const handleReset = () => {
     setRunning(false);
     setTimeLeft(parseInt(inputValue) * 60 || 0);
+    handleRetroRunningChange(false);
   };
 
   const handleTimeClick = () => {
@@ -94,6 +97,11 @@ const CountdownTimer: React.FC<CountdownTimerProps> = ({
     if (e.key === "Enter") confirmNewTime();
     if (e.key === "Escape") setEditing(false);
   };
+
+  useEffect(() => {
+    setTimeLeft(retroTime);
+    setRunning(retroTimeRunning);
+  }, [retroTime, retroTimeRunning]);
 
   return (
     <Box display="flex" alignItems="center" justifyContent="center">

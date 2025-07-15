@@ -15,4 +15,11 @@ export const MainButton = styled(Button)<ButtonProps>(({ theme }) => ({
   textTransform: "none",
   boxShadow: "none",
   padding: "12px 16px",
+
+  "&.Mui-disabled": {
+    backgroundColor: "#A0A0A0",
+    color: "#E0E0E0",
+    opacity: 0.6,
+    cursor: "not-allowed",
+  },
 }));

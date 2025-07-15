@@ -297,10 +297,12 @@ export default function RetroBoard() {
 
   const handleRetroTimeChange = (newTime: number) => {
     setRetroTime(newTime);
+    socket.emit("update_retro_time", { boardId, retroTime: newTime });
   };
 
   const handleRetroRunningChange = (isRunning: boolean) => {
     setRunning(isRunning);
+    socket.emit("toggle_retro_time_running", { boardId, retroTimeRunning: isRunning });
   };
 
   const cardsByColumn = useMemo(() => {
@@ -328,6 +330,8 @@ export default function RetroBoard() {
       setBoards(boards);
       if (boards[boardId]) {
         setCards(boards[boardId].cards);
+        setRetroTime(boards[boardId].retroTime);
+        setRunning(boards[boardId].retroTimeRunning);
       } else {
         const newBoard: Board = {
           id: boardId,
@@ -335,6 +339,8 @@ export default function RetroBoard() {
           scrumMaster: "anon",
           cards: {},
           users: {},
+          retroTime: retroTime,
+          retroTimeRunning: running,
         };
         socket.emit("create_board", newBoard);
       }
@@ -408,6 +414,18 @@ export default function RetroBoard() {
       }
     });
 
+    socket.on("retro_time_updated", ({ boardId, retroTime }) => {
+      if (boardId === boardId) {
+        setRetroTime(retroTime);
+      }
+    });
+
+    socket.on("retro_time_running_toggled", ({ boardId, retroTimeRunning }) => {
+      if (boardId === boardId) {
+        setRunning(retroTimeRunning);
+      }
+    });
+
     return () => {
       socket.off("initial_boards");
       socket.off("board_created");
@@ -416,6 +434,8 @@ export default function RetroBoard() {
       socket.off("card_moved");
       socket.off("user_added");
       socket.off("card_removed");
+      socket.off("retro_time_updated");
+      socket.off("retro_time_running_toggled");
     };
   }, [socket, boardId, retroType, user, retroTime, running]);
 
