@@ -1,10 +1,12 @@
 import { Box, Typography } from "@mui/material";
-import { Header, MainButton } from "../../components";
+import { CreateRetroDialog, Header, MainButton } from "../../components";
 import { useNavigate } from "react-router-dom";
 import { ROUTES } from "../../utils";
+import React from "react";
 
 const Home = () => {
   const navigate = useNavigate();
+  const [openRetroDialog, setOpenRetroDialog] = React.useState(false);
 
   return (
     <Box bgcolor="#1B1B1B" minHeight="100vh">
@@ -56,7 +58,7 @@ const Home = () => {
               <MainButton
                 color="inherit"
                 onClick={() => {
-                  navigate(ROUTES.RETROSPECTIVE);
+                  setOpenRetroDialog(true);
                 }}
                 sx={{
                   height: "48px",
@@ -71,6 +73,7 @@ const Home = () => {
           </Box>
         </Box>
       </Box>
+      <CreateRetroDialog open={openRetroDialog} setOpen={setOpenRetroDialog} />
     </Box>
   );
 };
