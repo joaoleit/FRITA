@@ -31,6 +31,7 @@ import { MainButton } from "../MainButton/MainButton";
 import ShareOutlinedIcon from "@mui/icons-material/ShareOutlined";
 import Popover from "../Popover/Popover";
 import { v4 as uuidv4 } from "uuid";
+import CountdownTimer from "./CountdownTimer";
 import WellBoard from "./RetroType/WellBoard";
 
 const styles = {
@@ -123,6 +124,8 @@ export default function RetroBoard() {
   // });
   const [userName, setUserName] = useState("");
   const [user, setUser] = useState<User | null>(null);
+  const [retroTime, setRetroTime] = useState(720);
+  const [running, setRunning] = useState(false);
 
   const id = Boolean(anchorEl) ? "simple-popover" : undefined;
 
@@ -156,8 +159,7 @@ export default function RetroBoard() {
   }, [retroType]);
 
   const boardUsers = useMemo(() => {
-    if (!user) return [];
-    return Object.values(boards?.[boardId]?.users ?? { [user.id]: user });
+    return Object.values(boards?.[boardId]?.users ?? {});
   }, [boards, boardId, user]);
 
   const columns: Columns = {
@@ -293,6 +295,14 @@ export default function RetroBoard() {
     setActiveId(null);
   };
 
+  const handleRetroTimeChange = (newTime: number) => {
+    setRetroTime(newTime);
+  };
+
+  const handleRetroRunningChange = (isRunning: boolean) => {
+    setRunning(isRunning);
+  };
+
   const cardsByColumn = useMemo(() => {
     const result: Record<string, CardItem[]> = {};
     for (const colId in columns) {
@@ -407,7 +417,7 @@ export default function RetroBoard() {
       socket.off("user_added");
       socket.off("card_removed");
     };
-  }, [socket, boardId, retroType, user]);
+  }, [socket, boardId, retroType, user, retroTime, running]);
 
   return (
     <Box
@@ -468,6 +478,34 @@ export default function RetroBoard() {
             borderRadius: "16px",
             width: "fit-content",
             display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            gap: 1,
+            height: toRem(68),
+            position: "fixed",
+            top: 85,
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            zIndex: 1000,
+          }}
+          boxShadow={1}
+          mb={1}
+        >
+          <CountdownTimer
+            isScrumMaster={user?.isScrumMaster ?? false}
+            handleRetroRunningChange={handleRetroRunningChange}
+            handleRetroTimeChange={handleRetroTimeChange}
+            retroTime={retroTime}
+            retroTimeRunning={running}
+          />
+        </Box>
+        <Box
+          sx={{
+            bgcolor: "#FFF",
+            padding: "1rem",
+            borderRadius: "16px",
+            width: "fit-content",
+            display: "flex",
             alignItems: "center",
             gap: 1,
             height: toRem(68),
@@ -500,18 +538,6 @@ export default function RetroBoard() {
             ))}
           </Box>
           <Divider sx={{ bgcolor: "#000" }} orientation="vertical" flexItem />
-          <IconButton>
-            <GridViewIcon
-              sx={{ cursor: "pointer", color: "#1B1B1B" }}
-              fontSize="large"
-            />
-          </IconButton>
-          <IconButton>
-            <AccessTimeOutlinedIcon
-              sx={{ cursor: "pointer", color: "#1B1B1B" }}
-              fontSize="large"
-            />
-          </IconButton>
           <MainButton
             onClick={(e) => {
               handleClickShare(e);
@@ -660,6 +686,7 @@ export default function RetroBoard() {
                   setUser({
                     name: userName,
                     id: uuidv4(),
+                    isScrumMaster: boardUsers.length === 0,
                   });
                 }
               }}
@@ -671,6 +698,7 @@ export default function RetroBoard() {
                 setUser({
                   name: userName,
                   id: uuidv4(),
+                  isScrumMaster: boardUsers.length === 0,
                 })
               }
               sx={{
