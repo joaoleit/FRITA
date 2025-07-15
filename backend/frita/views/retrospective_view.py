@@ -73,7 +73,6 @@ def update_retrospective(request, id):
         retro = retrospective_controller.update_retrospective(
             id=id,
             retro_type=data.get("retro_type"),
-            url=data.get("url"),
             participants=data.get("participants"),
             resume=data.get("resume"),
             is_active=data.get("is_active"),
@@ -117,7 +116,7 @@ def view_public_retro(request, token):
         retro = Retrospective.objects.get(token=token)
 
         return JsonResponse({
-            "project": retro.project,
+            "project": retro.project.id,
             "retro_type": retro.retro_type,
             "participants": retro.participants,
             "resume": retro.resume,
