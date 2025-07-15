@@ -32,6 +32,7 @@ import ShareOutlinedIcon from "@mui/icons-material/ShareOutlined";
 import Popover from "../Popover/Popover";
 import { v4 as uuidv4 } from "uuid";
 import CountdownTimer from "./CountdownTimer";
+import WellBoard from "./RetroType/WellBoard";
 
 const styles = {
   title: {
@@ -564,27 +565,26 @@ export default function RetroBoard() {
       </Box>
       <DndContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
         <Box display="flex" alignItems="stretch" flex={1}>
-          {Object.entries(columns).map(([colId, colData], idx, arr) => (
-            <React.Fragment key={colId}>
-              <ColumnComponent colId={colId} colData={colData}>
-                {cardsByColumn[colId]?.map((item) => (
-                  <DraggableCardItem
-                    key={item.id}
-                    item={item}
-                    onUpdateContent={handleUpdateCardContent}
-                    onDeleteCard={handleDeleteCard}
-                  />
-                ))}
-              </ColumnComponent>
-              {idx < arr.length - 1 && (
-                <Divider
-                  orientation="vertical"
-                  flexItem
-                  sx={{ mx: 1, bgcolor: "#000" }}
-                />
-              )}
-            </React.Fragment>
-          ))}
+          {retroType === RETROSPECTIVE_TYPES.WELL_NOT_SO_WELL ? (
+            <WellBoard
+              ColumnComponent={ColumnComponent}
+              DraggableCardItem={DraggableCardItem}
+              cardsByColumn={cardsByColumn}
+              columns={columns}
+              handleDeleteCard={handleDeleteCard}
+              handleUpdateCardContent={handleUpdateCardContent}
+            />
+          ) : (
+            // CHANGE THIS TO THE APPROPRIATE COMPONENT FOR OTHER RETRO TYPES
+            <WellBoard
+              ColumnComponent={ColumnComponent}
+              DraggableCardItem={DraggableCardItem}
+              cardsByColumn={cardsByColumn}
+              columns={columns}
+              handleDeleteCard={handleDeleteCard}
+              handleUpdateCardContent={handleUpdateCardContent}
+            />
+          )}
         </Box>
 
         <DragOverlay>
@@ -645,6 +645,7 @@ export default function RetroBoard() {
                 if (e.key === "Enter") {
                   handleAddCard();
                   setOpenAddCardDialog(false);
+                  e.preventDefault();
                 }
               }}
               sx={styles.textField}

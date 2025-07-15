@@ -34,12 +34,60 @@ const styles = {
 const InfoDialog = ({ open, retroType, setOpen, boardTitle }: Props) => {
   const retroInfo = useMemo(() => {
     if (retroType === "easy-as-pie") {
-      return <Box></Box>;
+      return (
+        <Box>
+          <Typography sx={styles.normalText}>
+            Easy As Pie é uma boa retrospectiva para procurar melhorias, pedir
+            desculpas por erros pessoais, apresentar novas ideias e reconhecer
+            as coisas boas.
+            <br />
+            <br />
+            <b>Executando a atividade</b>
+            <br />
+            <br />
+            1) Na tela, há desenhado uma torta grande com cinco fatias.
+            <br />
+            <br />
+            2) Identifique as cinco fatias da torta e descreva-as da seguinte
+            forma:
+            <br />
+            <ul>
+              <li>
+                Humble Pie - Admita um erro que ocorreu e peça desculpas pelo
+                mesmo.
+              </li>
+              <li>
+                Shoo Fly Pie - Identifique algo negativo que esteja atrapalhando
+                a equipe e que você queira remover.
+              </li>
+              <li>
+                Cutie Pie - Envie uma mensagem de agradecimento por alguém ou
+                alguma coisa.
+              </li>
+              <li>
+                Pie in the Sky - Apresente uma ideia que pode ser "impossível" -
+                uma meta ambiciosa, uma ideia fantasiosa ou um plano.
+              </li>
+              <li>
+                Easy as Pie - Reconheça algo que foi simples e prazeroso e que
+                você acredita que a equipe deve continuar fazendo.
+              </li>
+            </ul>
+            <br />
+            3) Peça aos participantes que pensem em cada fatia da torta, anotem
+            uma ideia ou pensamento por card e depois coloquem na fatia da torta
+            de acordo.
+            <br />
+            <br />
+            4) Converse em grupo sobre as notas.
+          </Typography>
+        </Box>
+      );
     } else if (retroType === "open-the-box") {
       return (
         <Box>
           <Typography sx={styles.normalText}>
-            O Open the Box promove a inovação e desafia as atividades atuais
+            O Open the Box promove a inovação e desafia as atividades atuais
             realizadas pela equipe.
             <br />
             <br />
@@ -50,7 +98,7 @@ const InfoDialog = ({ open, retroType, setOpen, boardTitle }: Props) => {
             <br />
             <br />
             “O mundo como o criamos é um processo do nosso pensamento. Ele não
-            pode ser mudado sem mudarmos o nosso pensamento.” <br />– Albert
+            pode ser mudado sem mudarmos o nosso pensamento.” <br />- Albert
             Einstein.
             <br />
             <br />
@@ -86,13 +134,13 @@ const InfoDialog = ({ open, retroType, setOpen, boardTitle }: Props) => {
             1) A tela é dividida em três áreas:
             <br />
             <br />
-            <b>Well</b> – coisas que deram certo, que nos impulsionam, nos
+            <b>Well</b> - coisas que deram certo, que nos impulsionam, nos
             ajudam a melhorar. Queremos repeti-las!
             <br />
-            <b>Not so Well</b> – coisas que deram errado, que precisam ser
+            <b>Not so Well</b> - coisas que deram errado, que precisam ser
             melhoradas, que nos impedem. Queremos eliminá-las ou evitá-las!
             <br />
-            <b>New ideas</b> – coisas que devemos considerar tentar, sugestões,
+            <b>New ideas</b> - coisas que devemos considerar tentar, sugestões,
             novas ideias.
             <br />
             <br />
