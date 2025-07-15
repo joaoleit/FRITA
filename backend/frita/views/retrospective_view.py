@@ -168,3 +168,21 @@ def remove_participant(request, id):
         return HttpResponseBadRequest(str(e))
     except retrospective_controller.Retrospective.DoesNotExist:
         return HttpResponseNotFound("Retrospectiva não encontrada.")
+  
+@csrf_exempt
+@require_POST  
+def generate_retro_resume(request, retro_id):
+    if request.method != "POST":
+        return HttpResponseNotAllowed(["POST"])
+
+    try:
+        retro = retrospective_controller.generate_retro_resume(retro_id=retro_id)
+
+        return JsonResponse({
+            "id": retro.id,
+            "resume": retro.resume,
+            "updated_at": str(retro.updated_at) if hasattr(retro, 'updated_at') else str(retro.created_at)
+        }, status=200)
+
+    except Exception as e:
+        return HttpResponseBadRequest(str(e))
