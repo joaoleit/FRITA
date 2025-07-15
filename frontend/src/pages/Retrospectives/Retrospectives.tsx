@@ -9,8 +9,8 @@ import {
   MenuItem,
   IconButton,
 } from "@mui/material";
-import { Header, MainButton } from "../../components";
-import { toRem } from "../../utils";
+import { CreateRetroDialog, Header, MainButton } from "../../components";
+import { ROUTES, toRem } from "../../utils";
 import { Dayjs } from "dayjs";
 
 import AddIcon from "@mui/icons-material/Add";
@@ -20,6 +20,7 @@ import React from "react";
 import CustomTable from "./Table";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
+import { useNavigate } from "react-router-dom";
 
 const styles = {
   input: {
@@ -43,10 +44,12 @@ const styles = {
 };
 
 const Retrospectives = () => {
+  const navigate = useNavigate();
   const [selectedProject, setSelectedProject] = React.useState("");
   const [selectedRetrospectiveType, setSelectedRetrospectiveType] =
     React.useState("");
   const [date, setDate] = React.useState<Date | null>(null);
+  const [openRetroDialog, setOpenRetroDialog] = React.useState(false);
 
   const projects = [
     {
@@ -111,9 +114,7 @@ const Retrospectives = () => {
           </Typography>
           <MainButton
             color="inherit"
-            onClick={() => {
-              return;
-            }}
+            onClick={() => setOpenRetroDialog(true)}
             sx={{
               // width: "123px",
               // height: "48px",
@@ -244,6 +245,7 @@ const Retrospectives = () => {
           <CustomTable />
         </Box>
       </Box>
+      <CreateRetroDialog open={openRetroDialog} setOpen={setOpenRetroDialog} />
     </Box>
   );
 };

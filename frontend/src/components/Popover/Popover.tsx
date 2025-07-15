@@ -1,6 +1,7 @@
 import React from "react";
-import { Box, Popover, Typography } from "@mui/material";
+import { Box, Icon, IconButton, Popover, Typography } from "@mui/material";
 import { toRem } from "../../utils";
+import CloseIcon from "@mui/icons-material/Close";
 
 interface PopoverProps {
   anchorEl: HTMLElement | null;
@@ -8,6 +9,7 @@ interface PopoverProps {
   id: "simple-popover" | undefined;
   title?: string;
   children?: React.ReactNode;
+  hasCloseButton?: boolean;
 }
 
 const CustomPopover = ({
@@ -16,6 +18,7 @@ const CustomPopover = ({
   id,
   children,
   title,
+  hasCloseButton = false,
 }: PopoverProps) => {
   const handleClose = () => {
     setAnchorEl(null);
@@ -46,21 +49,33 @@ const CustomPopover = ({
           paddingY: toRem(32),
         }}
       >
-        <Typography
-          sx={{
-            fontFamily: "'Poppins', sans-serif",
-            fontWeight: 400,
-            fontSize: "16px",
-            lineHeight: "32px",
-            letterSpacing: "0%",
-            verticalAlign: "middle",
-            color: "#5C5C5C",
-            maxWidth: "300px",
-            textAlign: "center",
-          }}
+        <Box
+          display="flex"
+          justifyContent="space-between"
+          alignItems="center"
+          gap={toRem(27)}
         >
-          {title}
-        </Typography>
+          <Typography
+            sx={{
+              fontFamily: "'Poppins', sans-serif",
+              fontWeight: 400,
+              fontSize: "16px",
+              lineHeight: "32px",
+              letterSpacing: "0%",
+              verticalAlign: "middle",
+              color: "#5C5C5C",
+              maxWidth: "300px",
+              textAlign: "center",
+            }}
+          >
+            {title}
+          </Typography>
+          {hasCloseButton && (
+            <IconButton onClick={handleClose}>
+              <CloseIcon sx={{ color: "#1B1B1B" }} />
+            </IconButton>
+          )}
+        </Box>
         <Box>{children}</Box>
       </Box>
     </Popover>
