@@ -19,6 +19,7 @@ export interface Columns {
 export interface User {
   name: string;
   id: string;
+  isScrumMaster: boolean;
 }
 
 export interface Board {
@@ -27,4 +28,6 @@ export interface Board {
   scrumMaster: string;
   cards: Record<string, CardItem>;
   users: Record<string, User>;
+  // retroTime: number;
+  // retroTimeRunning: boolean;
 }
