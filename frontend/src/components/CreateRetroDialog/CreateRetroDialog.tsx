@@ -14,6 +14,7 @@ import { useNavigate } from "react-router-dom";
 import { RETROSPECTIVE_TYPES, ROUTES, toRem } from "../../utils";
 import { v4 as uuidv4 } from "uuid";
 import CloseIcon from "@mui/icons-material/Close";
+import { useGetProjects } from "../../hooks";
 
 interface CreateRetroDialogProps {
   open: boolean;
@@ -25,12 +26,6 @@ interface ProjectOptionType {
   name: string;
 }
 
-const projects: ProjectOptionType[] = [
-  { name: "FRITA" },
-  { name: "Projeto 1" },
-  { name: "Projeto 2" },
-];
-
 const filter = createFilterOptions<ProjectOptionType>();
 
 const CreateRetroDialog = ({ open, setOpen }: CreateRetroDialogProps) => {
@@ -38,6 +33,17 @@ const CreateRetroDialog = ({ open, setOpen }: CreateRetroDialogProps) => {
   const [selectedRetro, setSelectedRetro] = useState("");
   const [retroName, setRetroName] = useState("");
   const [project, setProject] = React.useState<ProjectOptionType | null>(null);
+
+  const {data, isLoading} = useGetProjects();
+
+  const projects: ProjectOptionType[] = useMemo(() => {
+    if (data) {
+      return data.data.map((project) => ({
+        name: project.name,
+      }));
+    }
+    return [];
+  }, [data]);
 
   const retros = [
     {
@@ -171,6 +177,7 @@ const CreateRetroDialog = ({ open, setOpen }: CreateRetroDialogProps) => {
               },
               width: "35%",
             }}
+            loading={isLoading}
             value={project}
             onChange={(event, newValue) => {
               if (typeof newValue === "string") {
