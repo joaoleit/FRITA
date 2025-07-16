@@ -1,6 +1,9 @@
 from frita.views import views, retrospective_view, scrumaster_view, project_view, card_view
 from django.urls import path
-
+from rest_framework_simplejwt.views import (
+    TokenObtainPairView,
+    TokenRefreshView,
+)
 urlpatterns = [
     path('', views.exemplo_view, name='view'), # teste
     path('scrumasters/create/', scrumaster_view.create_scrumaster, name='create_scrumaster'),
@@ -27,4 +30,6 @@ urlpatterns = [
     path("cards/<int:id>/", card_view.get_card_id, name="get_card"),
     path("cards/update/<int:id>/", card_view.update_card, name="update_card"),
     path("cards/delete/<int:id>/", card_view.delete_card, name="delete_card"),
+    path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
 ]
