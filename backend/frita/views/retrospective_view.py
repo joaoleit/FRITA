@@ -4,10 +4,14 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_GET, require_POST
 from frita.controllers import retrospective_controller
 from frita.models import Retrospective
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework import status
 
 
-@csrf_exempt
-@require_POST
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
 def create_retrospective(request):
     if request.method != "POST":
         return HttpResponseNotAllowed(["POST"])
@@ -17,17 +21,18 @@ def create_retrospective(request):
 
         retro = retrospective_controller.create_retrospective(
             project_id=data.get("project_id"),
-            retro_type=data.get("retro_type") # ex.: 'easy_as_pie'
+            retro_type=data.get("retro_type"), # ex.: 'easy_as_pie'
+            name=data.get("name")
         )
 
-        return JsonResponse({
+        return Response({
             "id": retro.id,
             "project": retro.project.id,
             "retro_type": retro.retro_type,
             "url": retro.url,
             "created_at": retro.created_at,
             "is_active": retro.is_active,
-        }, status=201)
+        }, status=status.HTTP_201_CREATED)
 
     except json.JSONDecodeError:
         return HttpResponseBadRequest("JSON inválido")
@@ -35,11 +40,16 @@ def create_retrospective(request):
         return HttpResponseBadRequest(str(e))
 
 
-@require_GET
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
 def get_retrospectives(request):
+    params = request.query_params
+
+    print('\nSADDSA', params)
+
     try:
-        retros = retrospective_controller.get_retrospectives()
-        return JsonResponse(retros, safe=False, status=200)
+        retros = retrospective_controller.get_retrospectives(params)
+        return Response(retros, status=status.HTTP_200_OK)
     except Exception as e:
         return HttpResponseBadRequest(str(e))
 

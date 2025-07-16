@@ -1,16 +1,21 @@
-import axios from "axios";
 import { useQuery } from "@tanstack/react-query";
 import type { Project } from "../types";
+import { api } from "../utils";
 
-
-const getProjects = async () => {
-  const response = await axios.get<Project[]>("http://localhost:8000/projects/");
-  return response;
+const getProjects = async (): Promise<Project[]> => {
+  const response = await api.get<Project[]>("/projects/", {
+    requiresAuth: true,
+  });
+  return response.data;
 };
 
-export const useGetProjects = () => {
+export const useGetProjects = (enabled = true) => {
   return useQuery({
     queryKey: ["projects"],
     queryFn: getProjects,
+    staleTime: 5 * 60 * 1000,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    enabled
   });
 };

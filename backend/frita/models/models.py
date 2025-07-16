@@ -51,10 +51,11 @@ class Project(models.Model):
 
 
 class Retrospective(models.Model):
+    name = models.CharField(max_length=100, default="Retrospectiva não nomeada")
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
     retro_type = models.CharField(
-    max_length=50,
-    choices=RetroType.choices
+        max_length=50,
+        choices=RetroType.choices
     )
     url = models.CharField(max_length=255) # url que leva pra retro
     token = models.UUIDField(default=uuid.uuid4, unique=True, null=True, editable=False)

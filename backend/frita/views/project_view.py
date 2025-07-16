@@ -3,9 +3,14 @@ from django.http import JsonResponse, HttpResponseBadRequest, HttpResponseNotFou
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST, require_GET
 from frita.controllers import project_controller
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework import status
+from rest_framework_simplejwt.authentication import JWTAuthentication
 
-@csrf_exempt
-@require_POST
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
 def create_project(request):
     if request.method != "POST":
         return HttpResponseNotAllowed(["POST"])
@@ -14,44 +19,47 @@ def create_project(request):
         data = json.loads(request.body)
         project = project_controller.create_project(
             name=data.get("name"),
-            creator_id=data.get("creator_id"),
+            creator_id=request.user.id,
         )
 
-        return JsonResponse({
+        return Response({
             "id": project.id,
             "name": project.name,
             "creator_id": project.creator.id,
             "created_at": project.created_at,
-        }, status=201)
+        }, status=status.HTTP_201_CREATED)
 
     except json.JSONDecodeError:
         return HttpResponseBadRequest("JSON inválido")
     except Exception as e:
         return HttpResponseBadRequest(str(e))
 
-@require_GET
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
 def get_projects(request):
     try:
-        projects = project_controller.get_projects()
-        return JsonResponse(projects, safe=False, status=200)
+        projects = project_controller.get_projects(request.user.id)
+        return Response(projects, status=status.HTTP_200_OK)
     except Exception as e:
-        return HttpResponseBadRequest(str(e))
+        return Response(str(e), status=status.HTTP_400_BAD_REQUEST)
 
-@require_GET
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
 def get_project_id(request, id):
     try:
         p = project_controller.get_project_by_id(id)
-        return JsonResponse({
+        return Response({
             "id": p.id,
             "name": p.name,
             "creator_id": p.creator.id,
             "creator_name": p.creator.name,
             "created_at": p.created_at,
-        })
+        }, status=status.HTTP_200_OK)
     except project_controller.Project.DoesNotExist:
-        return HttpResponseNotFound("Projeto não encontrado.")
+        return Response("Projeto não encontrado.", status=status.HTTP_404_NOT_FOUND)
 
-@csrf_exempt
+@api_view(["PUT", "PATCH"])
+@permission_classes([IsAuthenticated])
 def update_project(request, id):
     if request.method not in ["PUT", "PATCH"]:
         return HttpResponseNotAllowed(["PUT", "PATCH"])
@@ -60,7 +68,7 @@ def update_project(request, id):
         data = json.loads(request.body)
         p = project_controller.update_project(id=id, name=data.get("name"))
 
-        return JsonResponse({
+        return Response({
             "id": p.id,
             "name": p.name,
             "creator_id": p.creator.id,
@@ -74,7 +82,8 @@ def update_project(request, id):
     except Exception as e:
         return HttpResponseBadRequest(str(e))
 
-@csrf_exempt
+@api_view(["DELETE"])
+@permission_classes([IsAuthenticated])
 def delete_project(request, id):
     if request.method != "DELETE":
         return HttpResponseNotAllowed(["DELETE"])

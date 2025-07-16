@@ -10,17 +10,19 @@ import {
   IconButton,
 } from "@mui/material";
 import { CreateRetroDialog, Header, MainButton } from "../../components";
-import { ROUTES, toRem } from "../../utils";
+import { RETROSPECTIVE_TYPES, ROUTES, toRem } from "../../utils";
 import { Dayjs } from "dayjs";
 
 import AddIcon from "@mui/icons-material/Add";
 import SearchIcon from "@mui/icons-material/Search";
 import ClearIcon from "@mui/icons-material/Clear";
-import React from "react";
+import React, { useMemo } from "react";
 import CustomTable from "./Table";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { useNavigate } from "react-router-dom";
+import { useGetProjects } from "../../hooks";
+import { useGetRetrospectives } from "../../hooks/useGetRetrospectives";
 
 const styles = {
   input: {
@@ -44,39 +46,41 @@ const styles = {
 };
 
 const Retrospectives = () => {
-  const navigate = useNavigate();
-  const [selectedProject, setSelectedProject] = React.useState("");
+  const [selectedProject, setSelectedProject] = React.useState<string | null>(null);
   const [selectedRetrospectiveType, setSelectedRetrospectiveType] =
-    React.useState("");
+    React.useState<string | null>(null);
   const [date, setDate] = React.useState<Date | null>(null);
+  const [search, setSearch] = React.useState<string | null>(null);
+
   const [openRetroDialog, setOpenRetroDialog] = React.useState(false);
 
-  const projects = [
-    {
-      value: 1,
-      label: "Projeto 1",
-    },
-    {
-      value: 2,
-      label: "Projeto 2",
-    },
-    {
-      value: 3,
-      label: "Projeto 3",
-    },
-  ];
+  const { data: dataProjects, isLoading: isLoadingProjects } = useGetProjects();
+  const { data: dataRetro, isLoading: isLoadingRetro } = useGetRetrospectives(
+    search ?? undefined,
+    selectedProject ? parseInt(selectedProject) : undefined,
+    selectedRetrospectiveType ?? undefined,
+    date ? new Date(date).toLocaleDateString() : undefined
+  );
+
+  const projects = useMemo(
+    () =>
+      (dataProjects ?? []).map((p) => {
+        return { value: p.id, label: p.name };
+      }),
+    [dataProjects]
+  );
 
   const retrospectiveTypes = [
     {
-      value: 1,
+      value: RETROSPECTIVE_TYPES.WELL_NOT_SO_WELL,
       label: "Well, Not So Well, New Ideas",
     },
     {
-      value: 2,
+      value: RETROSPECTIVE_TYPES.OPEN_THE_BOX,
       label: "Open the Box",
     },
     {
-      value: 3,
+      value: RETROSPECTIVE_TYPES.EASY_AS_PIE,
       label: "Easy As Pie",
     },
   ];
@@ -230,6 +234,8 @@ const Retrospectives = () => {
               Pesquisar
             </InputLabel>
             <OutlinedInput
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
               id="outlined-adornment-search"
               type={"text"}
               endAdornment={
@@ -242,7 +248,7 @@ const Retrospectives = () => {
           </FormControl>
         </Box>
         <Box display="flex" marginTop={toRem(30)} paddingX={toRem(40)}>
-          <CustomTable />
+          <CustomTable dataRetro={dataRetro} isLoadingRetro={isLoadingRetro} />
         </Box>
       </Box>
       <CreateRetroDialog open={openRetroDialog} setOpen={setOpenRetroDialog} />

@@ -4,8 +4,9 @@ from django.db import transaction
 from dotenv import load_dotenv
 from google import genai
 import os
+from django.utils.dateparse import parse_date
 
-def create_retrospective(project_id, retro_type):
+def create_retrospective(project_id, retro_type, name):
 
     if not all([project_id, retro_type]):
         raise ValueError("Campos obrigatórios ausentes.")
@@ -17,6 +18,7 @@ def create_retrospective(project_id, retro_type):
             raise ValueError("Projeto não encontrado.")
 
         retro = Retrospective.objects.create(
+            name=name,
             project=project,
             retro_type=retro_type,
             is_active=True
@@ -28,8 +30,30 @@ def create_retrospective(project_id, retro_type):
     return retro
 
 
-def get_retrospectives():
-    retros = Retrospective.objects.all()
+def get_retrospectives(params):
+    retros = Retrospective.objects.all().order_by("-created_at")
+
+    name = params.get("name")
+    if name:
+        retros = retros.filter(name__icontains=name)
+
+    project_id = params.get("project")
+    if project_id:
+        retros = retros.filter(project__id=project_id)
+
+    retro_type = params.get("retro_type")
+    if retro_type:
+        retros = retros.filter(retro_type=retro_type)
+
+    date_str = params.get("date")
+    if date_str:
+        try:
+            date = parse_date(date_str)
+            if date:
+                retros = retros.filter(created_at__date=date)
+        except Exception:
+            pass
+
     if not retros:
         raise Exception("Nenhuma retrospectiva encontrada.")
 
@@ -37,7 +61,8 @@ def get_retrospectives():
     for r in retros:
         lst.append({
             "id": r.id,
-            "project": r.project.id,
+            "name": r.name,
+            "project": {"id": r.project.id, "name": r.project.name},
             "retro_type": r.retro_type,
             "url": r.url,
             "participants": r.participants,
