@@ -59,6 +59,8 @@ const Header = ({ whiteVersion = false }: HeaderProps) => {
             onClick={() => {
               localStorage.removeItem("access_token");
               localStorage.removeItem("refresh_token");
+              localStorage.removeItem("retro-user");
+              setToken(null);
               navigate(ROUTES.LOGIN);
             }}
             sx={{
@@ -101,6 +103,8 @@ const Header = ({ whiteVersion = false }: HeaderProps) => {
             onClick={() => {
               localStorage.removeItem("access_token");
               localStorage.removeItem("refresh_token");
+              localStorage.removeItem("retro-user");
+              setToken(null);
               navigate(ROUTES.LOGIN);
             }}
             sx={{

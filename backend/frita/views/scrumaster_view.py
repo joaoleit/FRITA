@@ -108,3 +108,23 @@ def delete_scrumaster(request, id):
 
     except scrumaster_controller.ScrumMaster.DoesNotExist:
         return Response("Scrum Master não encontrado", status=status.HTTP_404_NOT_FOUND)
+    
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def get_scrumaster_user(request):
+
+    try:
+        master = scrumaster_controller.get_scrumaster_id(request.user.id)
+
+        return Response(
+            {
+                "id": master.id,
+                "name": master.name,
+                "email": master.email,
+                "created_at": master.created_at,
+            }
+        )
+
+    except scrumaster_controller.ScrumMaster.DoesNotExist:
+        return Response("Scrum Master não encontrado", status=status.HTTP_404_NOT_FOUND)

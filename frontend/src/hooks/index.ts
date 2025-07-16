@@ -4,3 +4,4 @@ export * from './useGetProjects';
 export * from './useLogin';
 export * from './useCreateProject';
 export * from './useCreateRetrospective';
+export * from './useGetUser';

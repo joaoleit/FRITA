@@ -12,3 +12,9 @@ export interface Retrospective {
   created_at: string;
   project: Project;
 }
+
+export interface ScrumMaster {
+  name: string;
+  id: number;
+  email: string;
+}

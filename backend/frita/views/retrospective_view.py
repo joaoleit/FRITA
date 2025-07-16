@@ -45,8 +45,6 @@ def create_retrospective(request):
 def get_retrospectives(request):
     params = request.query_params
 
-    print('\nSADDSA', params)
-
     try:
         retros = retrospective_controller.get_retrospectives(params)
         return Response(retros, status=status.HTTP_200_OK)

@@ -1,12 +1,22 @@
 import { Box, Typography } from "@mui/material";
 import { CreateRetroDialog, Header, MainButton } from "../../components";
 import { useNavigate } from "react-router-dom";
-import { ROUTES } from "../../utils";
-import React from "react";
+import { ROUTES, useAuth } from "../../utils";
+import React, { useEffect } from "react";
+import { useGetUser } from "../../hooks";
 
 const Home = () => {
   const navigate = useNavigate();
   const [openRetroDialog, setOpenRetroDialog] = React.useState(false);
+  const { token } = useAuth();
+
+  const { data } = useGetUser(!!token);
+
+  useEffect(() => {
+    if (data) {
+      localStorage.setItem("retro-user", JSON.stringify(data));
+    }
+  }, [data, token]);
 
   return (
     <Box bgcolor="#1B1B1B" minHeight="100vh">

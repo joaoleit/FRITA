@@ -112,18 +112,21 @@ export default function RetroBoard() {
   const [anchorEl, setAnchorEl] = React.useState<HTMLButtonElement | null>(
     null
   );
-  // const [user, setUser] = useState<User | null>(() => {
-  //   let stored = localStorage.getItem("retro-user");
-  //   if (stored) return JSON.parse(stored);
-  //   const newUser = {
-  //     name: "Usuário " + Math.floor(Math.random() * 1000),
-  //     id: uuidv4(),
-  //   };
-  //   localStorage.setItem("retro-user", JSON.stringify(newUser));
-  //   return newUser;
-  // });
+  const [user, setUser] = useState<User | null>(() => {
+    let stored = localStorage.getItem("retro-user");
+    if (stored) {
+      const json = JSON.parse(stored)
+      return {
+        id: json['id'].toString(),
+        name: json['name'],
+        isScrumMaster: true
+      }
+    };
+    
+    return null;
+  });
   const [userName, setUserName] = useState("");
-  const [user, setUser] = useState<User | null>(null);
+  // const [user, setUser] = useState<User | null>(null);
   const [retroTime, setRetroTime] = useState(720);
   const [running, setRunning] = useState(false);
 

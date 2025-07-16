@@ -1,6 +1,7 @@
 // utils/auth.ts
 import { jwtDecode } from "jwt-decode";
 import axios from "axios";
+import { useAuth } from "./auth-provider";
 
 interface JWTToken {
   exp: number;
@@ -37,5 +38,6 @@ export const checkAuth = async (): Promise<string | null> => {
 
   localStorage.removeItem("access_token");
   localStorage.removeItem("refresh_token");
+  localStorage.removeItem("retro-user");
   return null;
 };

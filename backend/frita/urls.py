@@ -12,6 +12,7 @@ urlpatterns = [
     path('scrumasters/<int:id>', scrumaster_view.get_scrumaster_id, name='get_scrumaster'),
     path('scrumasters/update/<int:id>', scrumaster_view.update_scrumaster, name='update_scrumaster'),
     path('scrumasters/delete/<int:id>', scrumaster_view.delete_scrumaster, name='delete_scrumaster'),
+    path('scrumasters/user/', scrumaster_view.get_scrumaster_user, name='get_scrumaster_user'),
     path("retrospectives/create/", retrospective_view.create_retrospective, name="create_retrospective"),
     path("retrospectives/get/", retrospective_view.get_retrospectives, name="get_retrospectives"),
     path("retrospectives/get/<int:id>/", retrospective_view.get_retrospective_id, name="get_retrospective"),
