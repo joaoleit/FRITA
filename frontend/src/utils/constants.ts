@@ -7,6 +7,7 @@ export const ROUTES = {
   RETROBOARD: "/retroboard",
   SETTINGS: "/settings",
   NOT_FOUND: "*",
+  RETROSPECTIVE_FINISHED: "/retrospective-finished",
 };
 
 export const RETROSPECTIVE_TYPES = {

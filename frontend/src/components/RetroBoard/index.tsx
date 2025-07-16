@@ -582,7 +582,7 @@ export default function RetroBoard() {
             }}
             sx={{ marginLeft: "16px" }}
           >
-            Salvar
+            Finalizar
           </MainButton>
         </Box>
       </Box>

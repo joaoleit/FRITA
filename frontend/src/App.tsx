@@ -1,5 +1,11 @@
 import { Routes, Route } from "react-router-dom";
-import { Home, Login, Register, Retrospectives } from "./pages";
+import {
+  Home,
+  Login,
+  Register,
+  RetroFinishedPage,
+  Retrospectives,
+} from "./pages";
 import { ROUTES } from "./utils";
 import RetroBoard from "./components/RetroBoard";
 import { RequireAuth } from "./components";
@@ -20,6 +26,14 @@ export default function App() {
       />
       <Route path={ROUTES.NOT_FOUND} element={<Home />} />
       <Route path={ROUTES.RETROBOARD} element={<RetroBoard />} />
+      <Route
+        path={ROUTES.RETROSPECTIVE_FINISHED}
+        element={
+          <RequireAuth>
+            <RetroFinishedPage />
+          </RequireAuth>
+        }
+      />
     </Routes>
   );
 }
