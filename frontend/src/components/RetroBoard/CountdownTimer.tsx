@@ -6,6 +6,7 @@ import {
   Typography,
   Stack,
   IconButton,
+  Input,
 } from "@mui/material";
 import PlayCircleOutlineIcon from "@mui/icons-material/PlayCircleOutline";
 import PauseCircleOutlineIcon from "@mui/icons-material/PauseCircleOutline";
@@ -81,6 +82,7 @@ const CountdownTimer: React.FC<CountdownTimerProps> = ({
   };
 
   const handleTimeInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (isNaN(Number(e.target.value))) return;
     setInputValue(e.target.value);
   };
 
@@ -122,8 +124,7 @@ const CountdownTimer: React.FC<CountdownTimerProps> = ({
         )}
       </IconButton>
       {editing ? (
-        <TextField
-          type="number"
+        <Input
           value={inputValue}
           onChange={handleTimeInputChange}
           onBlur={confirmNewTime}
@@ -131,6 +132,20 @@ const CountdownTimer: React.FC<CountdownTimerProps> = ({
           autoFocus
           inputProps={{ min: 0 }}
           size="small"
+          sx={{
+            width: 85.5,
+            p: 0,
+            m: 0,
+            "& .MuiInputBase-input": {
+              fontSize: "1.75rem",
+              p: 0,
+            },
+          }}
+          endAdornment={
+            <Typography sx={{ ml: 1, fontSize: "1rem", color: "#666" }}>
+              min
+            </Typography>
+          }
         />
       ) : (
         <Box

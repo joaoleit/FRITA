@@ -15,8 +15,6 @@ import {
   type DragStartEvent,
 } from "@dnd-kit/core";
 import { useSocket } from "../../hooks";
-import DraggableCardItem from "./DraggableCardItem";
-import ColumnComponent from "./ColumnComponent";
 import DragOverlayCard from "./DragOverlayCard";
 import type { Board, CardItem, Columns, User } from "./types";
 import InfoIcon from "@mui/icons-material/InfoOutline";
@@ -33,6 +31,8 @@ import Popover from "../Popover/Popover";
 import { v4 as uuidv4 } from "uuid";
 import CountdownTimer from "./CountdownTimer";
 import WellBoard from "./RetroType/WellBoard";
+import { getColumns } from "./RetroType/retroTypeColumns";
+import BoxBoard from "./RetroType/BoxBoard";
 
 const styles = {
   title: {
@@ -165,13 +165,8 @@ export default function RetroBoard() {
     return Object.values(boards?.[boardId]?.users ?? {});
   }, [boards, boardId, user]);
 
-  const columns: Columns = {
-    well: { name: "Well" },
-    not_well: { name: "Not so Well" },
-    new_ideas: { name: "New Ideas" },
-  };
-
   const activeCard = activeId ? cards[activeId] : null;
+  const columns = getColumns(retroType);
 
   const findNextAvailablePosition = (
     columnId: string,
@@ -213,8 +208,9 @@ export default function RetroBoard() {
 
   const handleAddCard = () => {
     if (!newCardText.trim() || !user) return;
+    const firstColumn = Object.keys(columns)[0];
     const id = `card-${Date.now()}`;
-    const { x, y } = findNextAvailablePosition("well", cards);
+    const { x, y } = findNextAvailablePosition(firstColumn, cards);
 
     const boardUsers = Object.values(
       boards?.[boardId]?.users ?? { [user.id]: user }
@@ -226,7 +222,7 @@ export default function RetroBoard() {
       content: newCardText,
       x,
       y,
-      columnId: "well",
+      columnId: firstColumn,
       user: user.name,
       color: colors[userIdx >= 0 ? userIdx % colors.length : 0],
     };
@@ -305,7 +301,10 @@ export default function RetroBoard() {
 
   const handleRetroRunningChange = (isRunning: boolean) => {
     setRunning(isRunning);
-    socket.emit("toggle_retro_time_running", { boardId, retroTimeRunning: isRunning });
+    socket.emit("toggle_retro_time_running", {
+      boardId,
+      retroTimeRunning: isRunning,
+    });
   };
 
   const cardsByColumn = useMemo(() => {
@@ -587,28 +586,26 @@ export default function RetroBoard() {
         </Box>
       </Box>
       <DndContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
-        <Box display="flex" alignItems="stretch" flex={1}>
-          {retroType === RETROSPECTIVE_TYPES.WELL_NOT_SO_WELL ? (
-            <WellBoard
-              ColumnComponent={ColumnComponent}
-              DraggableCardItem={DraggableCardItem}
-              cardsByColumn={cardsByColumn}
-              columns={columns}
-              handleDeleteCard={handleDeleteCard}
-              handleUpdateCardContent={handleUpdateCardContent}
-            />
-          ) : (
-            // CHANGE THIS TO THE APPROPRIATE COMPONENT FOR OTHER RETRO TYPES
-            <WellBoard
-              ColumnComponent={ColumnComponent}
-              DraggableCardItem={DraggableCardItem}
-              cardsByColumn={cardsByColumn}
-              columns={columns}
-              handleDeleteCard={handleDeleteCard}
-              handleUpdateCardContent={handleUpdateCardContent}
-            />
-          )}
-        </Box>
+        {retroType === RETROSPECTIVE_TYPES.WELL_NOT_SO_WELL ? (
+          <WellBoard
+            cardsByColumn={cardsByColumn}
+            handleDeleteCard={handleDeleteCard}
+            handleUpdateCardContent={handleUpdateCardContent}
+          />
+        ) : retroType === RETROSPECTIVE_TYPES.OPEN_THE_BOX ? (
+          <BoxBoard
+            cardsByColumn={cardsByColumn}
+            handleDeleteCard={handleDeleteCard}
+            handleUpdateCardContent={handleUpdateCardContent}
+          />
+        ) : (
+          // CHANGE THIS TO THE APPROPRIATE COMPONENT FOR OTHER RETRO TYPES
+          <WellBoard
+            cardsByColumn={cardsByColumn}
+            handleDeleteCard={handleDeleteCard}
+            handleUpdateCardContent={handleUpdateCardContent}
+          />
+        )}
 
         <DragOverlay>
           {activeCard ? <DragOverlayCard card={activeCard} /> : null}

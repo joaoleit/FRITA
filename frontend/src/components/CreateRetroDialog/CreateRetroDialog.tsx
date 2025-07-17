@@ -20,6 +20,7 @@ import {
   useGetProjects,
 } from "../../hooks";
 import { useQueryClient } from "@tanstack/react-query";
+import InfoDialog from "../RetroBoard/InfoDialog";
 
 interface CreateRetroDialogProps {
   open: boolean;
@@ -39,6 +40,10 @@ const CreateRetroDialog = ({ open, setOpen }: CreateRetroDialogProps) => {
   const [selectedRetro, setSelectedRetro] = useState("");
   const [retroName, setRetroName] = useState("");
   const [project, setProject] = React.useState<ProjectOptionType | null>(null);
+  const [infoDialogRetroType, setInfoDialogRetroType] = useState<string | null>(
+    null
+  );
+  const [infoDialogOpen, setInfoDialogOpen] = useState(false);
 
   const { data, isLoading } = useGetProjects(open);
   const queryClient = useQueryClient();
@@ -311,10 +316,25 @@ const CreateRetroDialog = ({ open, setOpen }: CreateRetroDialogProps) => {
                 </Typography>
               </Box>
 
-              <MainButton>Saiba mais</MainButton>
+              <MainButton
+                onClick={() => {
+                  setInfoDialogRetroType(retro.value);
+                  setInfoDialogOpen(true);
+                }}
+              >
+                Saiba mais
+              </MainButton>
             </Box>
           ))}
         </Box>
+        <InfoDialog
+          boardTitle={
+            retros.find((r) => r.value === infoDialogRetroType)?.label || ""
+          }
+          open={infoDialogOpen}
+          setOpen={setInfoDialogOpen}
+          retroType={infoDialogRetroType as RETROSPECTIVE_TYPES}
+        />
         <Box width="100%" display="flex" justifyContent="center">
           <MainButton disabled={!createEnable} onClick={handleCreateRetro}>
             Criar retrospectiva
