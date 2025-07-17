@@ -10,15 +10,15 @@ das colunas -> new ideas, stop ou recycle
 def validate_card_type(card):
     match card.retro.retro_type:
         case RetroType.WNSI:
-            if card.type not in ["well", "not so well", "new ideas"]:
+            if card.type not in ["well", "not_well", "new_ideas"]:
                 raise ValueError("O tipo do card não corresponde a nenhum campo da retrospectiva!")
 
         case RetroType.EASY_AS_PIE:
-            if card.type not in ["shoo fly pie", "pie in the sky", "cutie pie", "easy as pie", "humble pie"]:
+            if card.type not in ["shooFlyPie", "pieInTheSky", "cutiePie", "easyAsPie", "humblePie"]:
                 raise ValueError("O tipo do card não corresponde a nenhum campo da retrospectiva!")
                 
         case RetroType.OPEN_THE_BOX:
-            if card.type not in ["new ideas", "stop", "recycle"]:
+            if card.type not in ["new_ideas", "stop", "recycle"]:
                 raise ValueError("O tipo do card não corresponde a nenhum campo da retrospectiva!")
 
 class RetroType(models.TextChoices):
@@ -51,10 +51,11 @@ class Project(models.Model):
 
 
 class Retrospective(models.Model):
+    name = models.CharField(max_length=100, default="Retrospectiva não nomeada")
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
     retro_type = models.CharField(
-    max_length=50,
-    choices=RetroType.choices
+        max_length=50,
+        choices=RetroType.choices
     )
     url = models.CharField(max_length=255) # url que leva pra retro
     token = models.UUIDField(default=uuid.uuid4, unique=True, null=True, editable=False)
@@ -72,6 +73,7 @@ class Card(models.Model):
     content = models.TextField(null=True, blank=True) # descrição do card
     type = models.CharField(max_length=50) # tipo de card pra cada tipo de retro: recycle, new idea, etc
     created_at = models.DateTimeField(auto_now_add=True)
+    color = models.CharField(max_length=100, default='#CECECE')
 
     def __str__(self):
         return self.type, self.author

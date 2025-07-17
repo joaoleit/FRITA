@@ -1,20 +1,43 @@
 import {
+  Alert,
   Box,
   Button,
   Container,
   Link,
+  Snackbar,
   TextField,
   Typography,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import { ROUTES } from "../../utils";
+import { ROUTES, useAuth } from "../../utils";
 import { Header, MainButton } from "../../components";
+import { useLogin } from "../../hooks";
+import React from "react";
 
 const Login = () => {
+  const [openError, setOpenError] = React.useState(false);
+  const [email, setEmail] = React.useState("");
+  const [password, setPassword] = React.useState("");
+  const { setToken } = useAuth();
+
   const navigate = useNavigate();
 
+  const mutateLogin = useLogin(
+    (data) => {
+      setToken(data.access);
+      console.log(data)
+      navigate(ROUTES.HOME, { replace: true });
+    },
+    (error) => {
+      setOpenError(true);
+    }
+  );
+
   const handleLogin = () => {
-    navigate(ROUTES.HOME);
+    mutateLogin.mutate({
+      email: email,
+      password: password,
+    });
   };
 
   return (
@@ -61,6 +84,8 @@ const Login = () => {
                 fullWidth
                 label="Nome de usuário"
                 variant="outlined"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 sx={{
                   "& .MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline": {
                     borderColor: "#1B1B1B",
@@ -86,6 +111,8 @@ const Login = () => {
                 label="Senha"
                 type="password"
                 variant="outlined"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
                 sx={{
                   "& .MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline": {
                     borderColor: "#1B1B1B",
@@ -131,12 +158,28 @@ const Login = () => {
                 height: "48px",
               }}
               onClick={handleLogin}
+              disabled={password === "" || email === ""}
             >
               Entrar
             </MainButton>
           </Box>
         </Box>
       </Box>
+      <Snackbar
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+        color="error"
+        open={openError}
+        autoHideDuration={6000}
+        onClose={() => setOpenError(false)}
+      >
+        <Alert
+          onClose={() => setOpenError(false)}
+          severity="error"
+          sx={{ width: "100%" }}
+        >
+          {"Credenciais inválidas"}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };

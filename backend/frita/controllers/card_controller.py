@@ -1,6 +1,6 @@
 from frita.models import Retrospective, Card, validate_card_type
 
-def create_card(retro_id, author, content, type):
+def create_card(retro_id, author, content, type, color):
 
     if not retro_id:
         raise ValueError("Campo obrigatório ausente: retro_id")
@@ -18,7 +18,8 @@ def create_card(retro_id, author, content, type):
         retro=retro,
         author=author,
         content=content,
-        type=type # conferir no model os tipos válidos
+        type=type, # conferir no model os tipos válidos
+        color=color
     )
 
     card.save()

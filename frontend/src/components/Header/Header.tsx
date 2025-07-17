@@ -7,9 +7,9 @@ import {
   Container,
 } from "@mui/material";
 import { useNavigate, useLocation } from "react-router-dom";
-import { ROUTES } from "../../utils";
+import { checkAuth, ROUTES, useAuth } from "../../utils";
 import { MainButton } from "../MainButton/MainButton";
-import React from "react";
+import React, { useEffect, useMemo, useState } from "react";
 
 interface HeaderProps {
   whiteVersion?: boolean;
@@ -18,8 +18,7 @@ interface HeaderProps {
 const Header = ({ whiteVersion = false }: HeaderProps) => {
   const navigate = useNavigate();
   const location = useLocation();
-
-  console.log("Current location:", location.pathname);
+  const { token, setToken } = useAuth();
 
   const buttons = React.useMemo(() => {
     if (whiteVersion) {
@@ -57,7 +56,13 @@ const Header = ({ whiteVersion = false }: HeaderProps) => {
           </MainButton>
           <MainButton
             color="inherit"
-            onClick={() => navigate(ROUTES.LOGIN)}
+            onClick={() => {
+              localStorage.removeItem("access_token");
+              localStorage.removeItem("refresh_token");
+              localStorage.removeItem("retro-user");
+              setToken(null);
+              navigate(ROUTES.LOGIN);
+            }}
             sx={{
               height: "48px",
             }}
@@ -92,18 +97,36 @@ const Header = ({ whiteVersion = false }: HeaderProps) => {
         >
           Retrospectivas
         </MainButton>
-        <MainButton
-          color="inherit"
-          onClick={() => navigate(ROUTES.LOGIN)}
-          sx={{
-            width: "123px",
-            height: "48px",
-            bgcolor: "#FCF8F7",
-            color: "#1B1B1B",
-          }}
-        >
-          Fazer Login
-        </MainButton>
+        {token ? (
+          <MainButton
+            color="inherit"
+            onClick={() => {
+              localStorage.removeItem("access_token");
+              localStorage.removeItem("refresh_token");
+              localStorage.removeItem("retro-user");
+              setToken(null);
+              navigate(ROUTES.LOGIN);
+            }}
+            sx={{
+              height: "48px",
+            }}
+          >
+            Sair
+          </MainButton>
+        ) : (
+          <MainButton
+            color="inherit"
+            onClick={() => navigate(ROUTES.LOGIN)}
+            sx={{
+              width: "123px",
+              height: "48px",
+              bgcolor: "#FCF8F7",
+              color: "#1B1B1B",
+            }}
+          >
+            Fazer Login
+          </MainButton>
+        )}
       </>
     );
   }, [whiteVersion]);

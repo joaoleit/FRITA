@@ -4,10 +4,14 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_GET, require_POST
 from frita.controllers import retrospective_controller
 from frita.models import Retrospective
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework import status
 
 
-@csrf_exempt
-@require_POST
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
 def create_retrospective(request):
     if request.method != "POST":
         return HttpResponseNotAllowed(["POST"])
@@ -17,17 +21,18 @@ def create_retrospective(request):
 
         retro = retrospective_controller.create_retrospective(
             project_id=data.get("project_id"),
-            retro_type=data.get("retro_type") # ex.: 'easy_as_pie'
+            retro_type=data.get("retro_type"), # ex.: 'easy_as_pie'
+            name=data.get("name")
         )
 
-        return JsonResponse({
+        return Response({
             "id": retro.id,
             "project": retro.project.id,
             "retro_type": retro.retro_type,
             "url": retro.url,
             "created_at": retro.created_at,
             "is_active": retro.is_active,
-        }, status=201)
+        }, status=status.HTTP_201_CREATED)
 
     except json.JSONDecodeError:
         return HttpResponseBadRequest("JSON inválido")
@@ -35,20 +40,24 @@ def create_retrospective(request):
         return HttpResponseBadRequest(str(e))
 
 
-@require_GET
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
 def get_retrospectives(request):
+    params = request.query_params
+
     try:
-        retros = retrospective_controller.get_retrospectives()
-        return JsonResponse(retros, safe=False, status=200)
+        retros = retrospective_controller.get_retrospectives(params)
+        return Response(retros, status=status.HTTP_200_OK)
     except Exception as e:
         return HttpResponseBadRequest(str(e))
 
 
-@require_GET
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
 def get_retrospective_id(request, id):
     try:
         r = retrospective_controller.get_retrospective_id(id)
-        return JsonResponse({
+        return Response({
             "id": r.id,
             "project": r.project.id,
             "retro_type": r.retro_type,
@@ -57,7 +66,8 @@ def get_retrospective_id(request, id):
             "resume": r.resume,
             "created_at": r.created_at,
             "is_active": r.is_active,
-        })
+            "name": r.name
+        }, status=status.HTTP_200_OK)
     except retrospective_controller.Retrospective.DoesNotExist:
         return HttpResponseNotFound("Retrospectiva não encontrada")
 
@@ -127,8 +137,8 @@ def view_public_retro(request, token):
     except Retrospective.DoesNotExist:
         return HttpResponseNotFound("Retrospectiva não encontrada.")
     
-@csrf_exempt
-@require_POST
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
 def add_participant(request, id):
     try:
         data = json.loads(request.body)
@@ -183,6 +193,21 @@ def generate_retro_resume(request, retro_id):
             "resume": retro.resume,
             "updated_at": str(retro.updated_at) if hasattr(retro, 'updated_at') else str(retro.created_at)
         }, status=200)
+
+    except Exception as e:
+        return HttpResponseBadRequest(str(e))
+    
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def get_retro_cards(request, retro_id):
+    if request.method != "GET":
+        return HttpResponseNotAllowed(["GET"])
+
+    try:
+        cards = retrospective_controller.generate_retro_cards(retro_id=retro_id)
+        
+
+        return JsonResponse(cards, status=status.HTTP_200_OK, safe=False)
 
     except Exception as e:
         return HttpResponseBadRequest(str(e))

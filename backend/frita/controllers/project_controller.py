@@ -12,8 +12,8 @@ def create_project(name, creator_id):
     project = Project.objects.create(name=name, creator=creator)
     return project
 
-def get_projects():
-    projects = Project.objects.all()
+def get_projects(creator_id):
+    projects = Project.objects.filter(creator_id=creator_id)
     if not projects:
         raise ValueError("Nenhum projeto encontrado.")
 

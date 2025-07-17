@@ -6,12 +6,17 @@ import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
 import Table from "@mui/material/Table";
-import { toRem } from "../../utils";
+import { ROUTES, toRem } from "../../utils";
 import { Box, IconButton } from "@mui/material";
 import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import { MainButton, Popover } from "../../components";
+import { useGetRetrospectives } from "../../hooks/useGetRetrospectives";
+import type { Retrospective } from "../../types";
+import { useDeleteRetrospective } from "../../hooks";
+import { useNavigate } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
 
 const styles = {
   table: {
@@ -27,13 +32,34 @@ const styles = {
   },
 };
 
-const CustomTable = () => {
+interface Props {
+  dataRetro: Retrospective[] | undefined;
+  isLoadingRetro: boolean;
+}
+
+const CustomTable = ({ dataRetro, isLoadingRetro }: Props) => {
+  const queryClient = useQueryClient();
+  const navigate = useNavigate();
+  
   const [anchorEl, setAnchorEl] = React.useState<HTMLButtonElement | null>(
+    null
+  );
+  const [selectedRetroId, setSelectedRetroId] = React.useState<null | number>(
     null
   );
   const [popoverType, setPopoverType] = React.useState<
     "view" | "delete" | null
   >(null);
+  const deleteRetro = useDeleteRetrospective(() => {
+    queryClient.invalidateQueries({ queryKey: ["retrospectives"] });
+  });
+
+  const retroTypeText = (s: string) => {
+    if (s === "well/not_so_well/new_ideas")
+      return "Well, Not So Well, New Ideas";
+    else if (s === "easy_as_pie") return "Easy As Pie";
+    else return "Open the Box";
+  };
 
   const handleClick = (
     event: React.MouseEvent<HTMLButtonElement>,
@@ -60,7 +86,7 @@ const CustomTable = () => {
       }}
     >
       <Table
-        sx={{ minWidth: 650, height: toRem(533), border: "1px solid #1B1B1B" }}
+        sx={{ minWidth: 650, border: "1px solid #1B1B1B" }}
         aria-label="simple table"
       >
         <TableHead sx={{ backgroundColor: "#1B1B1B" }}>
@@ -83,53 +109,61 @@ const CustomTable = () => {
           </TableRow>
         </TableHead>
         <TableBody sx={{ maxHeight: toRem(533) }}>
-          {Array.from({ length: 9 }).map((_, idx) => (
+          {(dataRetro ?? []).map((r, idx) => (
             <TableRow key={idx} sx={{ height: toRem(53) }}>
               <TableCell
                 align="left"
                 sx={{ borderBottom: "1px solid #1B1B1B" }}
               >
-                Retrospectiva Sprint 02
+                {r.name}
               </TableCell>
               <TableCell
                 align="left"
                 sx={{ borderBottom: "1px solid #1B1B1B" }}
               >
-                FRITAS
+                {r.project.name}
               </TableCell>
               <TableCell
                 align="left"
                 sx={{ borderBottom: "1px solid #1B1B1B" }}
               >
-                Well, Not so well, New Ideas
+                {retroTypeText(r.retro_type)}
               </TableCell>
               <TableCell
                 align="left"
                 sx={{ borderBottom: "1px solid #1B1B1B" }}
               >
-                03/07/2025
+                {new Date(r.created_at).toLocaleDateString("pt-BR")}
               </TableCell>
               <TableCell
                 align="left"
                 sx={{
-                  borderBottom: "1px solid #1B1B1B",
+                  borderBottom:
+                    idx + 1 === (dataRetro?.length ?? 0)
+                      ? "none"
+                      : "1px solid #1B1B1B",
                   display: "flex",
                   gap: "8px",
                 }}
               >
                 <Box>
-                  <IconButton>
+                  <IconButton onClick={() => {
+                    navigate(`${ROUTES.RETROSPECTIVE_FINISHED}?retroId=${r.id}`, { replace: true });
+                  }}>
                     <VisibilityOutlinedIcon sx={{ color: "#1B1B1B" }} />
                   </IconButton>
                 </Box>
-                <Box>
+                {/* <Box>
                   <IconButton>
                     <EditIcon sx={{ color: "#1B1B1B" }} />
                   </IconButton>
-                </Box>
+                </Box> */}
                 <Box>
                   <IconButton
-                    onClick={(e) => handleClick(e, "delete")}
+                    onClick={(e) => {
+                      handleClick(e, "delete");
+                      setSelectedRetroId(r.id);
+                    }}
                     aria-describedby={id}
                   >
                     <DeleteOutlineIcon
@@ -161,7 +195,8 @@ const CustomTable = () => {
             <MainButton
               color="inherit"
               onClick={() => {
-                return;
+                if (selectedRetroId) deleteRetro.mutate(selectedRetroId);
+                handleClose();
               }}
               sx={{
                 bgcolor: "#FCF8F7",
@@ -171,10 +206,7 @@ const CustomTable = () => {
             >
               Sim
             </MainButton>
-            <MainButton
-              color="inherit"
-              onClick={handleClose}
-            >
+            <MainButton color="inherit" onClick={handleClose}>
               Não
             </MainButton>
           </Box>

@@ -3,9 +3,13 @@ from django.http import HttpResponseBadRequest, HttpResponseNotAllowed, HttpResp
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_GET, require_POST
 from frita.controllers import scrumaster_controller
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework import status
 
-@csrf_exempt
-@require_POST
+@api_view(["POST"])
+@permission_classes([])
 def create_scrumaster(request):
     if request.method != "POST":
         return HttpResponseNotAllowed(["POST"])
@@ -18,36 +22,36 @@ def create_scrumaster(request):
             password=data.get("password"),
         )
 
-        return JsonResponse(
+        return Response(
             {
                 "name": master.name,
                 "email": master.email,
                 "created_at": master.created_at,
             },
-            status=201,
+            status=status.HTTP_201_CREATED,
         )
 
-    except json.JSONDecodeError:
-        return HttpResponseBadRequest("JSON inválido")
     except Exception as e:
-        return HttpResponseBadRequest(str(e))
+        return Response(str(e), status=status.HTTP_400_BAD_REQUEST)
     
-@require_GET
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
 def get_scrumasters(request):
     try:
         masters = scrumaster_controller.get_scrumasters()
 
-        return JsonResponse(masters, status=200, safe=False)
+        return Response(masters, status=status.HTTP_200_OK)
     except Exception as e:
-        return HttpResponseBadRequest(f"Erro interno: {str(e)}")
+        return Response(str(e), status=status.HTTP_400_BAD_REQUEST)
 
-@require_GET
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
 def get_scrumaster_id(request, id):
 
     try:
         master = scrumaster_controller.get_scrumaster_id(id)
 
-        return JsonResponse(
+        return Response(
             {
                 "id": master.id,
                 "name": master.name,
@@ -57,9 +61,10 @@ def get_scrumaster_id(request, id):
         )
 
     except scrumaster_controller.ScrumMaster.DoesNotExist:
-        return HttpResponseNotFound("Scrum Master não encontrado")
+        return Response("Scrum Master não encontrado", status=status.HTTP_404_NOT_FOUND)
 
-@csrf_exempt
+@api_view(["PUT", "PATCH"])
+@permission_classes([IsAuthenticated])
 def update_scrumaster(request, id):
     if request.method not in ["PUT", "PATCH"]:
         return HttpResponseNotAllowed(["PUT", "PATCH"])
@@ -72,7 +77,7 @@ def update_scrumaster(request, id):
             email=data.get("email"),
         )
 
-        return JsonResponse(
+        return Response(
             {
                 "id": master.id,
                 "name": master.name,
@@ -82,23 +87,44 @@ def update_scrumaster(request, id):
         )
 
     except json.JSONDecodeError:
-        return HttpResponseBadRequest("JSON inválido")
+        return Response("JSON inválido", status=status.HTTP_400_BAD_REQUEST)
     except scrumaster_controller.ScrumMaster.DoesNotExist:
-        return HttpResponseNotFound("Scrum Master não encontrado")
+        return Response("Scrum Master não encontrado", status=status.HTTP_404_NOT_FOUND)
 
     except Exception as e:
-        return HttpResponseBadRequest(str(e))
+        return Response(str(e), status=status.HTTP_400_BAD_REQUEST)
 
-@csrf_exempt
+@api_view(["DELETE"])
+@permission_classes([IsAuthenticated])
 def delete_scrumaster(request, id):
     if request.method != "DELETE":
         return HttpResponseNotAllowed(["DELETE"])
 
     try:
         scrumaster_controller.delete_scrumaster(id)
-        return JsonResponse(
+        return Response(
             {"status": "success", "message": "Scrum Master deletado com sucesso"}
         )
 
     except scrumaster_controller.ScrumMaster.DoesNotExist:
-        return HttpResponseNotFound("Scrum Master não encontrado")
+        return Response("Scrum Master não encontrado", status=status.HTTP_404_NOT_FOUND)
+    
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def get_scrumaster_user(request):
+
+    try:
+        master = scrumaster_controller.get_scrumaster_id(request.user.id)
+
+        return Response(
+            {
+                "id": master.id,
+                "name": master.name,
+                "email": master.email,
+                "created_at": master.created_at,
+            }
+        )
+
+    except scrumaster_controller.ScrumMaster.DoesNotExist:
+        return Response("Scrum Master não encontrado", status=status.HTTP_404_NOT_FOUND)

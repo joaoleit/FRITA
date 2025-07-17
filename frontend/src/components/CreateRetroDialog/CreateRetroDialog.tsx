@@ -14,6 +14,12 @@ import { useNavigate } from "react-router-dom";
 import { RETROSPECTIVE_TYPES, ROUTES, toRem } from "../../utils";
 import { v4 as uuidv4 } from "uuid";
 import CloseIcon from "@mui/icons-material/Close";
+import {
+  useCreateProject,
+  useCreateRetrospective,
+  useGetProjects,
+} from "../../hooks";
+import { useQueryClient } from "@tanstack/react-query";
 import InfoDialog from "../RetroBoard/InfoDialog";
 
 interface CreateRetroDialogProps {
@@ -23,14 +29,9 @@ interface CreateRetroDialogProps {
 
 interface ProjectOptionType {
   inputValue?: string;
+  id?: number;
   name: string;
 }
-
-const projects: ProjectOptionType[] = [
-  { name: "FRITA" },
-  { name: "Projeto 1" },
-  { name: "Projeto 2" },
-];
 
 const filter = createFilterOptions<ProjectOptionType>();
 
@@ -43,6 +44,31 @@ const CreateRetroDialog = ({ open, setOpen }: CreateRetroDialogProps) => {
     null
   );
   const [infoDialogOpen, setInfoDialogOpen] = useState(false);
+
+  const { data, isLoading } = useGetProjects(open);
+  const queryClient = useQueryClient();
+
+  const createProject = useCreateProject((data) => {
+    setProject(data);
+    queryClient.invalidateQueries({ queryKey: ["projects"] });
+  });
+
+  const createRetro = useCreateRetrospective((data) => {
+    const boardId = uuidv4();
+    navigate(`${ROUTES.RETROBOARD}?type=${selectedRetro}&boardId=${boardId}&retroId=${data.id}`);
+    setOpen(false);
+    queryClient.invalidateQueries({ queryKey: ["retrospectives"] });
+  });
+
+  const projects: ProjectOptionType[] = useMemo(() => {
+    if (data) {
+      return data.map((project) => ({
+        name: project.name,
+        id: project.id,
+      }));
+    }
+    return [];
+  }, [data]);
 
   const retros = [
     {
@@ -83,10 +109,12 @@ const CreateRetroDialog = ({ open, setOpen }: CreateRetroDialogProps) => {
       retroName,
       project,
     });
-    if (createEnable) {
-      const boardId = uuidv4();
-      navigate(`${ROUTES.RETROBOARD}?type=${selectedRetro}&boardId=${boardId}`);
-      setOpen(false);
+    if (createEnable && project?.id) {
+      createRetro.mutate({
+        name: retroName,
+        project_id: project.id,
+        retro_type: selectedRetro
+      });
     }
   }, [selectedRetro, retroName, project, createEnable, navigate, setOpen]);
 
@@ -176,6 +204,7 @@ const CreateRetroDialog = ({ open, setOpen }: CreateRetroDialogProps) => {
               },
               width: "35%",
             }}
+            loading={isLoading}
             value={project}
             onChange={(event, newValue) => {
               if (typeof newValue === "string") {
@@ -183,9 +212,7 @@ const CreateRetroDialog = ({ open, setOpen }: CreateRetroDialogProps) => {
                   name: newValue,
                 });
               } else if (newValue && newValue.inputValue) {
-                setProject({
-                  name: newValue.inputValue,
-                });
+                createProject.mutate(newValue.inputValue);
               } else {
                 setProject(newValue);
               }

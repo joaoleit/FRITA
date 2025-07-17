@@ -13,18 +13,35 @@ import { useNavigate } from "react-router-dom";
 import { ROUTES } from "../../utils";
 import { Header, MainButton } from "../../components";
 import React from "react";
+import { useCreateScrumMaster } from "../../hooks";
 
 const Register = () => {
   const [open, setOpen] = React.useState(false);
+  const [openError, setOpenError] = React.useState(false);
+  const [userName, setUserName] = React.useState("");
+  const [email, setEmail] = React.useState("");
+  const [password, setPassword] = React.useState("");
   const navigate = useNavigate();
 
+  const mutateCreateScrumMaster = useCreateScrumMaster(
+    () => {
+      setOpen(true);
+      setTimeout(() => {
+        navigate(ROUTES.LOGIN);
+      }, 3000);
+    },
+    (error) => {
+      console.error("Error creating Scrum Master:", error);
+      setOpenError(true);
+    }
+  );
+
   const handleRegister = () => {
-    // Simulate a successful registration
-    setOpen(true);
-    // Redirect to home page after registration
-    setTimeout(() => {
-      navigate(ROUTES.HOME);
-    }, 3000); // Redirect after 2 seconds
+    mutateCreateScrumMaster.mutate({
+      name: userName,
+      email: email,
+      password: password,
+    });
   };
 
   return (
@@ -71,6 +88,8 @@ const Register = () => {
                 fullWidth
                 label="Nome de usuário"
                 variant="outlined"
+                value={userName}
+                onChange={(e) => setUserName(e.target.value)}
                 sx={{
                   "& .MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline": {
                     borderColor: "#1B1B1B",
@@ -96,6 +115,8 @@ const Register = () => {
                 label="E-mail"
                 type="email"
                 variant="outlined"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 sx={{
                   "& .MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline": {
                     borderColor: "#1B1B1B",
@@ -121,6 +142,8 @@ const Register = () => {
                 label="Senha"
                 type="password"
                 variant="outlined"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
                 sx={{
                   "& .MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline": {
                     borderColor: "#1B1B1B",
@@ -149,6 +172,7 @@ const Register = () => {
                 height: "48px",
               }}
               onClick={handleRegister}
+              disabled={!userName || !email || !password}
             >
               Cadastrar
             </MainButton>
@@ -160,8 +184,32 @@ const Register = () => {
         open={open}
         autoHideDuration={6000}
         onClose={() => setOpen(false)}
-        message="Cadastro realizado com sucesso!"
-      />
+      >
+        <Alert
+          onClose={() => setOpen(false)}
+          severity="success"
+          sx={{ width: "100%" }}
+          icon={<CheckIcon />}
+        >
+          Cadastro realizado com sucesso!
+        </Alert>
+      </Snackbar>
+      <Snackbar
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+        color="error"
+        // sx={{ backgroundColor: "#FF0000" }}
+        open={openError}
+        autoHideDuration={6000}
+        onClose={() => setOpenError(false)}
+      >
+        <Alert
+          onClose={() => setOpenError(false)}
+          severity="error"
+          sx={{ width: "100%" }}
+        >
+          {mutateCreateScrumMaster.error?.response.data || "Erro ao cadastrar!"}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };
