@@ -14,6 +14,7 @@ import { useNavigate } from "react-router-dom";
 import { RETROSPECTIVE_TYPES, ROUTES, toRem } from "../../utils";
 import { v4 as uuidv4 } from "uuid";
 import CloseIcon from "@mui/icons-material/Close";
+import InfoDialog from "../RetroBoard/InfoDialog";
 
 interface CreateRetroDialogProps {
   open: boolean;
@@ -38,6 +39,10 @@ const CreateRetroDialog = ({ open, setOpen }: CreateRetroDialogProps) => {
   const [selectedRetro, setSelectedRetro] = useState("");
   const [retroName, setRetroName] = useState("");
   const [project, setProject] = React.useState<ProjectOptionType | null>(null);
+  const [infoDialogRetroType, setInfoDialogRetroType] = useState<string | null>(
+    null
+  );
+  const [infoDialogOpen, setInfoDialogOpen] = useState(false);
 
   const retros = [
     {
@@ -284,10 +289,25 @@ const CreateRetroDialog = ({ open, setOpen }: CreateRetroDialogProps) => {
                 </Typography>
               </Box>
 
-              <MainButton>Saiba mais</MainButton>
+              <MainButton
+                onClick={() => {
+                  setInfoDialogRetroType(retro.value);
+                  setInfoDialogOpen(true);
+                }}
+              >
+                Saiba mais
+              </MainButton>
             </Box>
           ))}
         </Box>
+        <InfoDialog
+          boardTitle={
+            retros.find((r) => r.value === infoDialogRetroType)?.label || ""
+          }
+          open={infoDialogOpen}
+          setOpen={setInfoDialogOpen}
+          retroType={infoDialogRetroType as RETROSPECTIVE_TYPES}
+        />
         <Box width="100%" display="flex" justifyContent="center">
           <MainButton disabled={!createEnable} onClick={handleCreateRetro}>
             Criar retrospectiva

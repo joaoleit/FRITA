@@ -7,12 +7,17 @@ interface ColumnComponentProps {
   colId: string;
   colData: Column;
   children: React.ReactNode;
+  headerRenderer?: (
+    text: string,
+    style?: React.CSSProperties
+  ) => React.ReactNode;
 }
 
 const ColumnComponent: React.FC<ColumnComponentProps> = ({
   colId,
   colData,
   children,
+  headerRenderer,
 }) => {
   const { setNodeRef } = useDroppable({ id: colId });
 
@@ -22,8 +27,7 @@ const ColumnComponent: React.FC<ColumnComponentProps> = ({
       key={colId}
       sx={{
         flex: 1,
-        minHeight: 600,
-        p: 2,
+        height: "inherit",
         borderRadius: 2,
         position: "relative",
       }}
@@ -38,7 +42,22 @@ const ColumnComponent: React.FC<ColumnComponentProps> = ({
           textAlign: "center",
         }}
       >
-        {colData.name}
+        {headerRenderer ? (
+          headerRenderer(colData.name)
+        ) : (
+          <Typography
+            sx={{
+              fontFamily: "'Poppins', sans-serif",
+              fontWeight: 700,
+              fontSize: "20px",
+              lineHeight: "52px",
+              letterSpacing: "0.2px",
+              textAlign: "center",
+            }}
+          >
+            {colData.name}
+          </Typography>
+        )}
       </Typography>
       {children}
     </Box>
