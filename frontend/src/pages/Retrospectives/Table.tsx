@@ -6,7 +6,7 @@ import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
 import Table from "@mui/material/Table";
-import { toRem } from "../../utils";
+import { ROUTES, toRem } from "../../utils";
 import { Box, IconButton } from "@mui/material";
 import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
 import EditIcon from "@mui/icons-material/Edit";
@@ -14,6 +14,9 @@ import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import { MainButton, Popover } from "../../components";
 import { useGetRetrospectives } from "../../hooks/useGetRetrospectives";
 import type { Retrospective } from "../../types";
+import { useDeleteRetrospective } from "../../hooks";
+import { useNavigate } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
 
 const styles = {
   table: {
@@ -31,16 +34,25 @@ const styles = {
 
 interface Props {
   dataRetro: Retrospective[] | undefined;
-  isLoadingRetro: boolean
+  isLoadingRetro: boolean;
 }
 
-const CustomTable = ({dataRetro, isLoadingRetro}: Props) => {
+const CustomTable = ({ dataRetro, isLoadingRetro }: Props) => {
+  const queryClient = useQueryClient();
+  const navigate = useNavigate();
+  
   const [anchorEl, setAnchorEl] = React.useState<HTMLButtonElement | null>(
+    null
+  );
+  const [selectedRetroId, setSelectedRetroId] = React.useState<null | number>(
     null
   );
   const [popoverType, setPopoverType] = React.useState<
     "view" | "delete" | null
   >(null);
+  const deleteRetro = useDeleteRetrospective(() => {
+    queryClient.invalidateQueries({ queryKey: ["retrospectives"] });
+  });
 
   const retroTypeText = (s: string) => {
     if (s === "well/not_so_well/new_ideas")
@@ -135,18 +147,23 @@ const CustomTable = ({dataRetro, isLoadingRetro}: Props) => {
                 }}
               >
                 <Box>
-                  <IconButton>
+                  <IconButton onClick={() => {
+                    navigate(`${ROUTES.RETROSPECTIVE_FINISHED}?retroId=${r.id}`, { replace: true });
+                  }}>
                     <VisibilityOutlinedIcon sx={{ color: "#1B1B1B" }} />
                   </IconButton>
                 </Box>
-                <Box>
+                {/* <Box>
                   <IconButton>
                     <EditIcon sx={{ color: "#1B1B1B" }} />
                   </IconButton>
-                </Box>
+                </Box> */}
                 <Box>
                   <IconButton
-                    onClick={(e) => handleClick(e, "delete")}
+                    onClick={(e) => {
+                      handleClick(e, "delete");
+                      setSelectedRetroId(r.id);
+                    }}
                     aria-describedby={id}
                   >
                     <DeleteOutlineIcon
@@ -178,7 +195,8 @@ const CustomTable = ({dataRetro, isLoadingRetro}: Props) => {
             <MainButton
               color="inherit"
               onClick={() => {
-                return;
+                if (selectedRetroId) deleteRetro.mutate(selectedRetroId);
+                handleClose();
               }}
               sx={{
                 bgcolor: "#FCF8F7",

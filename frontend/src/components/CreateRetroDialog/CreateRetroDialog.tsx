@@ -53,9 +53,9 @@ const CreateRetroDialog = ({ open, setOpen }: CreateRetroDialogProps) => {
     queryClient.invalidateQueries({ queryKey: ["projects"] });
   });
 
-  const createRetro = useCreateRetrospective(() => {
+  const createRetro = useCreateRetrospective((data) => {
     const boardId = uuidv4();
-    navigate(`${ROUTES.RETROBOARD}?type=${selectedRetro}&boardId=${boardId}`);
+    navigate(`${ROUTES.RETROBOARD}?type=${selectedRetro}&boardId=${boardId}&retroId=${data.id}`);
     setOpen(false);
     queryClient.invalidateQueries({ queryKey: ["retrospectives"] });
   });

@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import {
   Button,
   TextField,
@@ -14,14 +14,14 @@ import {
   type DragEndEvent,
   type DragStartEvent,
 } from "@dnd-kit/core";
-import { useSocket } from "../../hooks";
+import { useAddParticipant, useCreateCard, useRetroResume, useSocket } from "../../hooks";
 import DragOverlayCard from "./DragOverlayCard";
 import type { Board, CardItem, Columns, User } from "./types";
 import InfoIcon from "@mui/icons-material/InfoOutline";
-import { useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 import React from "react";
-import { RETROSPECTIVE_TYPES, toRem } from "../../utils";
+import { RETROSPECTIVE_TYPES, ROUTES, toRem } from "../../utils";
 import InfoDialog from "./InfoDialog";
 import GridViewIcon from "@mui/icons-material/GridView";
 import AccessTimeOutlinedIcon from "@mui/icons-material/AccessTimeOutlined";
@@ -100,6 +100,15 @@ export default function RetroBoard() {
   const [searchParams] = useSearchParams();
   const typeParam = searchParams.get("type");
   const boardIdParam = searchParams.get("boardId") ?? `board-${Date.now()}`;
+  const searchRetroId = searchParams.get("retroId");
+  const retroId = searchRetroId ? parseInt(searchRetroId) : 0;
+  const navigate = useNavigate();
+
+  const createCard = useCreateCard();
+  const addParticipant = useAddParticipant();
+  const generateResume = useRetroResume(() => {
+    navigate(`${ROUTES.RETROSPECTIVE_FINISHED}?retroId=${retroId}`, { replace: true });
+  });
 
   const [boards, setBoards] = useState<Record<string, Board>>({});
   const socket = useSocket("http://localhost:3001");
@@ -115,14 +124,14 @@ export default function RetroBoard() {
   const [user, setUser] = useState<User | null>(() => {
     let stored = localStorage.getItem("retro-user");
     if (stored) {
-      const json = JSON.parse(stored)
+      const json = JSON.parse(stored);
       return {
-        id: json['id'].toString(),
-        name: json['name'],
-        isScrumMaster: true
-      }
-    };
-    
+        id: json["id"].toString(),
+        name: json["name"],
+        isScrumMaster: true,
+      };
+    }
+
     return null;
   });
   const [userName, setUserName] = useState("");
@@ -441,6 +450,34 @@ export default function RetroBoard() {
     };
   }, [socket, boardId, retroType, user, retroTime, running]);
 
+  const handleEndRetro = useCallback(async () => {
+    const promisesCards = Object.values(cards).map((card) =>
+      createCard.mutateAsync({
+        author: card.user,
+        color: card.color ?? "#FCF8F7",
+        content: card.content,
+        retro_id: retroId,
+        type: card.columnId,
+      })
+    );
+
+    const promisesParticipants = boardUsers.map((u) => {
+      addParticipant.mutateAsync({
+        name: u.name,
+        retroId: retroId
+      })
+    })
+
+    try {
+      await Promise.all(promisesCards);
+      await Promise.all(promisesParticipants);
+      
+      generateResume.mutate(retroId);
+    } catch (err) {
+      console.error("Erro ao criar cards", err);
+    }
+  }, [cards, createCard, retroId]);
+
   return (
     <Box
       minHeight="100vh"
@@ -576,10 +613,9 @@ export default function RetroBoard() {
             Compartilhar
           </MainButton>
           <MainButton
-            onClick={() => {
-              return;
-            }}
+            onClick={handleEndRetro}
             sx={{ marginLeft: "16px" }}
+            disabled={!user?.isScrumMaster}
           >
             Finalizar
           </MainButton>

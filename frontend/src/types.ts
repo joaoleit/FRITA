@@ -11,10 +11,20 @@ export interface Retrospective {
   retro_type: RETROSPECTIVE_TYPES;
   created_at: string;
   project: Project;
+  resume: string;
 }
 
 export interface ScrumMaster {
   name: string;
   id: number;
   email: string;
+}
+
+export interface Card {
+  retro: number;
+  author: string;
+  content: string;
+  type: string;
+  created_at: string;
+  color: string;
 }

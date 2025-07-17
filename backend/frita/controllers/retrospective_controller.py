@@ -190,3 +190,25 @@ def generate_retro_resume(retro_id):
     retro.resume = resumo_gerado
     retro.save()
     return retro
+
+def generate_retro_cards(retro_id):
+    try:
+        retro = Retrospective.objects.get(id=retro_id)
+    except Retrospective.DoesNotExist:
+        raise ValueError("Retrospectiva não encontrada.")
+    
+    if not retro.is_active:
+        raise ValueError("A retrospectiva precisa ter sido finalizada para gerar um resumo.")
+    
+    lst = []
+    for c in retro.card_set.all():
+        lst.append({
+            "id": c.id,
+            "retro": c.retro.id,
+            "author": c.author,
+            "content": c.content,
+            "type": c.type,
+            "created_at": c.created_at,
+            "color": c.color
+        })
+    return lst

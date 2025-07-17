@@ -52,11 +52,12 @@ def get_retrospectives(request):
         return HttpResponseBadRequest(str(e))
 
 
-@require_GET
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
 def get_retrospective_id(request, id):
     try:
         r = retrospective_controller.get_retrospective_id(id)
-        return JsonResponse({
+        return Response({
             "id": r.id,
             "project": r.project.id,
             "retro_type": r.retro_type,
@@ -65,7 +66,8 @@ def get_retrospective_id(request, id):
             "resume": r.resume,
             "created_at": r.created_at,
             "is_active": r.is_active,
-        })
+            "name": r.name
+        }, status=status.HTTP_200_OK)
     except retrospective_controller.Retrospective.DoesNotExist:
         return HttpResponseNotFound("Retrospectiva não encontrada")
 
@@ -135,8 +137,8 @@ def view_public_retro(request, token):
     except Retrospective.DoesNotExist:
         return HttpResponseNotFound("Retrospectiva não encontrada.")
     
-@csrf_exempt
-@require_POST
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
 def add_participant(request, id):
     try:
         data = json.loads(request.body)
@@ -191,6 +193,21 @@ def generate_retro_resume(request, retro_id):
             "resume": retro.resume,
             "updated_at": str(retro.updated_at) if hasattr(retro, 'updated_at') else str(retro.created_at)
         }, status=200)
+
+    except Exception as e:
+        return HttpResponseBadRequest(str(e))
+    
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def get_retro_cards(request, retro_id):
+    if request.method != "GET":
+        return HttpResponseNotAllowed(["GET"])
+
+    try:
+        cards = retrospective_controller.generate_retro_cards(retro_id=retro_id)
+        
+
+        return JsonResponse(cards, status=status.HTTP_200_OK, safe=False)
 
     except Exception as e:
         return HttpResponseBadRequest(str(e))

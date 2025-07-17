@@ -4,10 +4,14 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_GET, require_POST
 from frita.controllers import card_controller
 from frita.models import Card
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework import status
 
 
-@csrf_exempt
-@require_POST
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
 def create_card(request):
     if request.method != "POST":
         return HttpResponseNotAllowed(["POST"])
@@ -19,7 +23,8 @@ def create_card(request):
             retro_id=data.get("retro_id"),
             author=data.get("author"),
             content = data.get("content"),
-            type = data.get("type")
+            type = data.get("type"),
+            color = data.get("color")
         )
 
         return JsonResponse({
@@ -28,7 +33,8 @@ def create_card(request):
             "content": card.content,
             "type": card.type,
             "created_at": card.created_at,
-        }, status=201)
+            "color": card.color
+        }, status=status.HTTP_201_CREATED)
 
     except json.JSONDecodeError:
         return HttpResponseBadRequest("JSON inválido")
