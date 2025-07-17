@@ -9,7 +9,7 @@ const columnsMap: Record<RETROSPECTIVE_TYPES, Columns> = {
   },
   [RETROSPECTIVE_TYPES.OPEN_THE_BOX]: {
     new_ideas: { name: "Novas Ideias" },
-    stop: { name: "Parar" },
+    stop: { name: "Parar!" },
     recycle: { name: "Reciclar" },
   },
   [RETROSPECTIVE_TYPES.EASY_AS_PIE]: {

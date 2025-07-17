@@ -59,7 +59,7 @@ const BoxBoard: React.FC<{
                 textAlign: "center",
                 display: "inline-block",
                 position: "absolute",
-                bottom: 200,
+                bottom: 180,
                 right: 70,
                 "&::before": {
                   content: '""',
@@ -107,7 +107,67 @@ const BoxBoard: React.FC<{
       </Box>
       {/* Second column: top right */}
       <Box sx={{ gridRow: "1", gridColumn: "2", height: "100%" }}>
-        <ColumnComponent colId={col2} colData={columns[col2]}>
+        <ColumnComponent
+          colId={col2}
+          colData={columns[col2]}
+          headerRenderer={(text) => (
+            <Box
+              sx={{
+                fontFamily: "Poppins",
+                fontSize: "20px",
+                fontStyle: "normal",
+                fontWeight: 700,
+                lineHeight: "24px",
+                letterSpacing: "0.2px",
+                textAlign: "center",
+                display: "inline-block",
+                position: "absolute",
+                bottom: 180,
+                left: 70,
+                "&::before": {
+                  content: '""',
+                  display: "block",
+                  position: "absolute",
+                  bottom: -10,
+                  right: 0,
+                  width: 55,
+                  height: 10,
+                  backgroundImage: "url(/Vector%2011.svg)",
+                  backgroundRepeat: "no-repeat",
+                },
+                "&::after": {
+                  content: '""',
+                  display: "block",
+                  position: "absolute",
+                  top: 30,
+                  left: 0,
+                  transform: "translateX(-50%)",
+                  width: 100,
+                  height: 100,
+                  backgroundImage: "url(/seta2%201.png)",
+                  backgroundRepeat: "no-repeat",
+                },
+              }}
+            >
+              {text}
+              <span
+                style={{
+                  position: "absolute",
+                  top: "50%",
+                  left: 45,
+                  transform: "translateY(-50%)",
+                  width: 90,
+                  height: 75,
+                  display: "block",
+                  backgroundImage: "url(/mao%201.png)",
+                  backgroundRepeat: "no-repeat",
+                  backgroundSize: "contain",
+                  pointerEvents: "none",
+                }}
+              />
+            </Box>
+          )}
+        >
           {cardsByColumn[col2]?.map((item) => (
             <DraggableCardItem
               key={item.id}
@@ -120,7 +180,42 @@ const BoxBoard: React.FC<{
       </Box>
       {/* Third column: bottom, spans both columns */}
       <Box sx={{ gridRow: "2", gridColumn: "1 / span 2", height: "100%" }}>
-        <ColumnComponent colId={col3} colData={columns[col3]}>
+        <ColumnComponent
+          colId={col3}
+          colData={columns[col3]}
+          headerRenderer={(text) => (
+            <Box
+              sx={{
+                fontFamily: "Poppins",
+                fontSize: "20px",
+                fontStyle: "normal",
+                fontWeight: 700,
+                lineHeight: "24px",
+                letterSpacing: "0.2px",
+                textAlign: "center",
+                display: "inline-block",
+                position: "absolute",
+                top: 80,
+                left: "50%",
+                transform: "translateX(-50%)",
+                "&::before": {
+                  content: '""',
+                  display: "block",
+                  position: "absolute",
+                  bottom: -15,
+                  left: "50%",
+                  transform: "translateX(-50%)",
+                  width: 100,
+                  height: 100,
+                  backgroundImage: "url(/reciclar%201.png)",
+                  backgroundRepeat: "no-repeat",
+                },
+              }}
+            >
+              {text}
+            </Box>
+          )}
+        >
           {cardsByColumn[col3]?.map((item) => (
             <DraggableCardItem
               key={item.id}
