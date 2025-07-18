@@ -14,7 +14,12 @@ import {
   type DragEndEvent,
   type DragStartEvent,
 } from "@dnd-kit/core";
-import { useAddParticipant, useCreateCard, useRetroResume, useSocket } from "../../hooks";
+import {
+  useAddParticipant,
+  useCreateCard,
+  useRetroResume,
+  useSocket,
+} from "../../hooks";
 import DragOverlayCard from "./DragOverlayCard";
 import type { Board, CardItem, Columns, User } from "./types";
 import InfoIcon from "@mui/icons-material/InfoOutline";
@@ -107,7 +112,9 @@ export default function RetroBoard() {
   const createCard = useCreateCard();
   const addParticipant = useAddParticipant();
   const generateResume = useRetroResume(() => {
-    navigate(`${ROUTES.RETROSPECTIVE_FINISHED}?retroId=${retroId}`, { replace: true });
+    navigate(`${ROUTES.RETROSPECTIVE_FINISHED}?retroId=${retroId}`, {
+      replace: true,
+    });
   });
 
   const [boards, setBoards] = useState<Record<string, Board>>({});
@@ -464,14 +471,14 @@ export default function RetroBoard() {
     const promisesParticipants = boardUsers.map((u) => {
       addParticipant.mutateAsync({
         name: u.name,
-        retroId: retroId
-      })
-    })
+        retroId: retroId,
+      });
+    });
 
     try {
       await Promise.all(promisesCards);
       await Promise.all(promisesParticipants);
-      
+
       generateResume.mutate(retroId);
     } catch (err) {
       console.error("Erro ao criar cards", err);
