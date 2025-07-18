@@ -2,6 +2,7 @@ import json
 from django.http import JsonResponse, HttpResponseBadRequest, HttpResponseNotAllowed, HttpResponseNotFound
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_GET, require_POST
+from django.http import HttpResponse
 from frita.controllers import retrospective_controller
 from frita.models import Retrospective
 from rest_framework.decorators import api_view, permission_classes
@@ -210,4 +211,18 @@ def get_retro_cards(request, retro_id):
         return JsonResponse(cards, status=status.HTTP_200_OK, safe=False)
 
     except Exception as e:
+        return HttpResponseBadRequest(str(e))
+    
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def export_retro_pdf(request, retro_id):
+    try:
+        pdf_data = retrospective_controller.generate_retro_pdf(retro_id)
+
+        response = HttpResponse(pdf_data, content_type='application/pdf')
+        response['Content-Disposition'] = f'attachment; filename=retro_{retro_id}_resumo.pdf'
+        return response
+
+    except ValueError as e:
         return HttpResponseBadRequest(str(e))

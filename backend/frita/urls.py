@@ -23,6 +23,7 @@ urlpatterns = [
     path("retrospectives/<int:id>/remove_participant/", retrospective_view.remove_participant, name="remove_participant"),
     path("retrospectives/resume/<int:retro_id>/", retrospective_view.generate_retro_resume, name="resume"),
     path("retrospectives/cards/<int:retro_id>/", retrospective_view.get_retro_cards, name="retro_cards"),
+    path("retrospectives/<int:retro_id>/export/", retrospective_view.export_retro_pdf, name="export_retro_pdf"),
     path("projects/create/", project_view.create_project, name="create_project"),
     path("projects/", project_view.get_projects, name="get_projects"),
     path("projects/<int:id>/", project_view.get_project_id, name="get_project"),

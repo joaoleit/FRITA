@@ -1,9 +1,12 @@
 from frita.models import Retrospective, Project
 from django.core.exceptions import ValidationError
+from django.template.loader import render_to_string
+from xhtml2pdf import pisa
 from django.db import transaction
 from dotenv import load_dotenv
 from google import genai
 import os
+import io
 from django.utils.dateparse import parse_date
 
 def create_retrospective(project_id, retro_type, name):
@@ -212,3 +215,21 @@ def generate_retro_cards(retro_id):
             "color": c.color
         })
     return lst
+
+
+def generate_retro_pdf(retro_id):
+    try:
+        retro = Retrospective.objects.get(id=retro_id)
+    except Retrospective.DoesNotExist:
+        raise ValueError("Retrospectiva não encontrada.")
+
+    # HTML com o template
+    html = render_to_string("retro_resume.html", {"retro": retro})
+
+    result = io.BytesIO()
+    pdf = pisa.CreatePDF(io.StringIO(html), dest=result)
+
+    if pdf.err:
+        raise ValueError("Erro ao gerar PDF.")
+
+    return result.getvalue()  # binário do PDF
