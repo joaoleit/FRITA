@@ -1,14 +1,11 @@
 import { Box, Typography } from "@mui/material";
-import React from "react";
 import { MainButton } from "../MainButton/MainButton";
 import SaveOutlinedIcon from "@mui/icons-material/SaveOutlined";
-import { useNavigate, useSearchParams } from "react-router-dom";
-import { RETROSPECTIVE_TYPES, ROUTES, toRem } from "../../utils";
+import { useSearchParams } from "react-router-dom";
+import { toRem } from "../../utils";
 import { useGetRetrospective } from "../../hooks";
 import { getColumns } from "../RetroBoard/RetroType/retroTypeColumns";
-import { v3 } from "uuid";
 import { useGetRetroCards } from "../../hooks/useGetRetroCards";
-
 
 const RetroFinished = () => {
   const [searchParams] = useSearchParams();
@@ -215,7 +212,7 @@ const RetroFinished = () => {
                     <Box
                       sx={{
                         display: "grid",
-                        gridTemplateColumns: "1fr 1fr 1fr",
+                        gridTemplateColumns: "1fr 1fr 1fr 1fr",
                         gap: toRem(16),
                         width: "fit-content",
                       }}

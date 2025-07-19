@@ -22,7 +22,7 @@ def create_retrospective(request):
 
         retro = retrospective_controller.create_retrospective(
             project_id=data.get("project_id"),
-            retro_type=data.get("retro_type"), # ex.: 'easy_as_pie'
+            retro_type=data.get("retro_type"),  # ex.: 'easy_as_pie'
             name=data.get("name")
         )
 
@@ -137,7 +137,8 @@ def view_public_retro(request, token):
 
     except Retrospective.DoesNotExist:
         return HttpResponseNotFound("Retrospectiva não encontrada.")
-    
+
+
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def add_participant(request, id):
@@ -145,7 +146,8 @@ def add_participant(request, id):
         data = json.loads(request.body)
         participant_name = data.get("name")
 
-        retro = retrospective_controller.add_participant_to_retro(id, participant_name)
+        retro = retrospective_controller.add_participant_to_retro(
+            id, participant_name)
 
         return JsonResponse({
             "status": "success",
@@ -158,7 +160,8 @@ def add_participant(request, id):
         return HttpResponseBadRequest(str(e))
     except retrospective_controller.Retrospective.DoesNotExist:
         return HttpResponseNotFound("Retrospectiva não encontrada.")
-    
+
+
 @csrf_exempt
 @require_POST
 def remove_participant(request, id):
@@ -166,7 +169,8 @@ def remove_participant(request, id):
         data = json.loads(request.body)
         participant_name = data.get("name")
 
-        retro = retrospective_controller.remove_participant_from_retro(id, participant_name)
+        retro = retrospective_controller.remove_participant_from_retro(
+            id, participant_name)
 
         return JsonResponse({
             "status": "success",
@@ -179,25 +183,46 @@ def remove_participant(request, id):
         return HttpResponseBadRequest(str(e))
     except retrospective_controller.Retrospective.DoesNotExist:
         return HttpResponseNotFound("Retrospectiva não encontrada.")
-  
+
+
 @csrf_exempt
-@require_POST  
+@require_POST
 def generate_retro_resume(request, retro_id):
     if request.method != "POST":
         return HttpResponseNotAllowed(["POST"])
 
+    import threading
+    from frita.models import Retrospective
+
+    def background_generate_resume(retro_id):
+        try:
+            retro = retrospective_controller.generate_retro_resume(
+                retro_id=retro_id)
+            if hasattr(retro, 'resume'):
+                Retrospective.objects.filter(
+                    id=retro.id).update(resume=retro.resume)
+        except Exception as e:
+            pass
+
     try:
-        retro = retrospective_controller.generate_retro_resume(retro_id=retro_id)
+        retro = Retrospective.objects.get(id=retro_id)
+        Retrospective.objects.filter(id=retro_id).update(
+            resume="Ainda estamos gerando o resumo, por favor, aguarde um pouco mais.")
+
+        thread = threading.Thread(
+            target=background_generate_resume, args=(retro_id,))
+        thread.start()
 
         return JsonResponse({
             "id": retro.id,
-            "resume": retro.resume,
+            "resume": "Ainda estamos gerando o resumo, por favor, aguarde um pouco mais.",
             "updated_at": str(retro.updated_at) if hasattr(retro, 'updated_at') else str(retro.created_at)
         }, status=200)
 
     except Exception as e:
         return HttpResponseBadRequest(str(e))
-    
+
+
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def get_retro_cards(request, retro_id):
@@ -205,15 +230,15 @@ def get_retro_cards(request, retro_id):
         return HttpResponseNotAllowed(["GET"])
 
     try:
-        cards = retrospective_controller.generate_retro_cards(retro_id=retro_id)
-        
+        cards = retrospective_controller.generate_retro_cards(
+            retro_id=retro_id)
 
         return JsonResponse(cards, status=status.HTTP_200_OK, safe=False)
 
     except Exception as e:
         return HttpResponseBadRequest(str(e))
-    
 
+      
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def export_retro_pdf(request, retro_id):
