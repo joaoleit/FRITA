@@ -10,3 +10,4 @@ export * from './useCreateCard';
 export * from './useRetroResume';
 export * from './useAddParticipant';
 export * from './useDeleteRetrospective';
+export * from './useExportRetro';

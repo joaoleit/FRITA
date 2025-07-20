@@ -55,7 +55,9 @@ const CreateRetroDialog = ({ open, setOpen }: CreateRetroDialogProps) => {
 
   const createRetro = useCreateRetrospective((data) => {
     const boardId = uuidv4();
-    navigate(`${ROUTES.RETROBOARD}?type=${selectedRetro}&boardId=${boardId}&retroId=${data.id}`);
+    navigate(
+      `${ROUTES.RETROBOARD}?type=${selectedRetro}&boardId=${boardId}&retroId=${data.id}`
+    );
     setOpen(false);
     queryClient.invalidateQueries({ queryKey: ["retrospectives"] });
   });
@@ -77,6 +79,7 @@ const CreateRetroDialog = ({ open, setOpen }: CreateRetroDialogProps) => {
       description:
         "Uma retrospectiva simples para discutir o que funcionou, o que precisa melhorar e propor novas ideias.",
       img: "wellnotsowell.svg",
+      disabled: false,
     },
     {
       value: RETROSPECTIVE_TYPES.OPEN_THE_BOX,
@@ -84,6 +87,7 @@ const CreateRetroDialog = ({ open, setOpen }: CreateRetroDialogProps) => {
       description:
         "Uma retrospectiva aberta para explorar pontos escondidos, revelar preocupações e levantar sugestões de forma colaborativa.",
       img: "caixa.svg",
+      disabled: false,
     },
     {
       value: RETROSPECTIVE_TYPES.EASY_AS_PIE,
@@ -91,6 +95,7 @@ const CreateRetroDialog = ({ open, setOpen }: CreateRetroDialogProps) => {
       description:
         "Uma retrospectiva divertida que avalia o que foi fácil, difícil ou poderia ser mais leve de realizar.",
       img: "pie.svg",
+      disabled: true,
     },
   ];
 
@@ -113,7 +118,7 @@ const CreateRetroDialog = ({ open, setOpen }: CreateRetroDialogProps) => {
       createRetro.mutate({
         name: retroName,
         project_id: project.id,
-        retro_type: selectedRetro
+        retro_type: selectedRetro,
       });
     }
   }, [selectedRetro, retroName, project, createEnable, navigate, setOpen]);
@@ -272,14 +277,22 @@ const CreateRetroDialog = ({ open, setOpen }: CreateRetroDialogProps) => {
                 border: "1px solid #1B1B1B",
                 borderRadius: "6px",
                 padding: toRem(30),
-                bgcolor: selectedRetro === retro.value ? "#CECECE" : "#FFFFFF",
-                cursor: "pointer",
+                bgcolor: retro.disabled
+                  ? "#919191ff"
+                  : selectedRetro === retro.value
+                  ? "#CECECE"
+                  : "#FFFFFF",
+                cursor: retro.disabled ? "auto" : "pointer",
                 "&:hover": {
-                  boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
+                  boxShadow: retro.disabled
+                    ? undefined
+                    : "0px 4px 6px rgba(0, 0, 0, 0.1)",
                 },
               }}
               key={retro.value}
-              onClick={() => setSelectedRetro(retro.value)}
+              onClick={
+                retro.disabled ? undefined : () => setSelectedRetro(retro.value)
+              }
             >
               <Box
                 marginBottom={toRem(16)}
@@ -294,13 +307,31 @@ const CreateRetroDialog = ({ open, setOpen }: CreateRetroDialogProps) => {
                   fontWeight: 700,
                   fontSize: "16px",
                   lineHeight: "24px",
-                  marginBottom: toRem(20),
+                  marginBottom: retro.disabled ? undefined : toRem(20),
                   textAlign: "center",
                   color: "#1B1B1B",
+                  textDecorationLine: retro.disabled
+                    ? "line-through"
+                    : undefined,
                 }}
               >
                 {retro.label}
               </Typography>
+              {retro.disabled && (
+                <Typography
+                  sx={{
+                    fontFamily: "'Poppins', sans-serif",
+                    fontWeight: 700,
+                    fontSize: "12px",
+                    lineHeight: "24px",
+                    textAlign: "center",
+                    color: "#1B1B1B",
+                    mt: -2,
+                  }}
+                >
+                  (Indisponível)
+                </Typography>
+              )}
               <Box sx={{ flexGrow: 1, textAlign: "center" }}>
                 <Typography
                   sx={{
