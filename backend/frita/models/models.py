@@ -81,8 +81,3 @@ class Card(models.Model):
     def save(self, *args, **kwargs):
         validate_card_type(self)
         super().save(*args, **kwargs)
-
-class CardGrouping(models.Model):
-    retro = models.ForeignKey(Retrospective, on_delete=models.CASCADE)
-    group_id = models.CharField(max_length=10, default='0')
-    card_id = models.CharField(max_length=10)
