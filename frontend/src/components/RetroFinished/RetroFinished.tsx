@@ -3,9 +3,10 @@ import { MainButton } from "../MainButton/MainButton";
 import SaveOutlinedIcon from "@mui/icons-material/SaveOutlined";
 import { useSearchParams } from "react-router-dom";
 import { toRem } from "../../utils";
-import { useGetRetrospective } from "../../hooks";
+import { useExportRetro, useGetRetrospective } from "../../hooks";
 import { getColumns } from "../RetroBoard/RetroType/retroTypeColumns";
 import { useGetRetroCards } from "../../hooks/useGetRetroCards";
+import { useEffect } from "react";
 
 const RetroFinished = () => {
   const [searchParams] = useSearchParams();
@@ -13,6 +14,12 @@ const RetroFinished = () => {
 
   const { data } = useGetRetrospective(retroId ? parseInt(retroId) : 0);
   const { data: dataCards } = useGetRetroCards(retroId ? parseInt(retroId) : 0);
+
+  const { mutate: exportRetro, data: dataExport, isSuccess } = useExportRetro();
+
+  const handleExport = () => {
+    if (retroId) exportRetro(parseInt(retroId));
+  };
 
   const columns = getColumns(data?.retro_type ?? "easy_as_pie");
 
@@ -22,6 +29,17 @@ const RetroFinished = () => {
     else if (s === "easy_as_pie") return "Easy As Pie";
     else return "Open the Box";
   };
+
+  useEffect(() => {
+    if (isSuccess && data) {
+      const url = URL.createObjectURL(dataExport);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `retrospectiva-${retroId}.pdf`;
+      link.click();
+      URL.revokeObjectURL(url);
+    }
+  }, [isSuccess, data]);
 
   if (!data) return null;
 
@@ -100,9 +118,7 @@ const RetroFinished = () => {
         </Box>
         <Box>
           <MainButton
-            onClick={() => {
-              return;
-            }}
+            onClick={handleExport}
             sx={{
               bgcolor: "#FCF8F7",
               color: "#1B1B1B",
@@ -112,7 +128,7 @@ const RetroFinished = () => {
             }}
           >
             <SaveOutlinedIcon />
-            Salvar
+            Baixar
           </MainButton>
         </Box>
       </Box>
